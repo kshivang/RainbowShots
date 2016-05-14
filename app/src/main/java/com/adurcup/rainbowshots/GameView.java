@@ -1,6 +1,9 @@
 package com.adurcup.rainbowshots;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
@@ -12,6 +15,22 @@ public class GameView extends SurfaceView implements Runnable{
 
     private Thread gameThread = null;
 
+    private SurfaceHolder ourHolder;
+
+    private volatile boolean playing;
+
+    private boolean paused = true;
+
+    private Canvas canvas;
+    private Paint paint;
+
+    private long fps;
+
+    private long timeThisFrame;
+
+    private int screenX;
+    private int screenY;
+
     public GameView(Context context, int x, int y) {
         super(context);
 
@@ -20,7 +39,6 @@ public class GameView extends SurfaceView implements Runnable{
 
     @Override
     public void run(){
-
     }
 
     public void resume(){
