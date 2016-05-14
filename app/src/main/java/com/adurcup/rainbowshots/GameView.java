@@ -100,17 +100,16 @@ public class GameView extends SurfaceView implements Runnable{
         }
 
 
-        if(drops[nextDrop].shoot(screenX / 2, screenY /2, drops[0].DOWN)) {
+        if(nextDrop == 0) {
+            if (drops[nextDrop].shoot(screenX / 2, screenY / 2, drops[0].DOWN)) {
 
-            // Shot fired
-            // Prepare for the next shot
-            nextDrop++;
+                nextDrop++;
 
-            // Loop back to the first one if we have reached the last
-            if (nextDrop == maxDrops) {
-                // This stops the firing of another bullet until one completes its journey
-                // Because if bullet 0 is still active shoot returns false.
-                nextDrop = 0;
+                /*if (nextDrop == maxDrops) {
+                    // This stops the firing of another bullet until one completes its journey
+                    // Because if bullet 0 is still active shoot returns false.
+                    nextDrop = 0;
+                }*/
             }
         }
 
@@ -119,6 +118,7 @@ public class GameView extends SurfaceView implements Runnable{
 
             if(drops[i].getImpactPointY() > screenY){
                 drops[i].setInactive();
+                nextDrop = 0;
             }
         }
         // Check for ball colliding with a brick
