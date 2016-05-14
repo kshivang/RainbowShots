@@ -35,7 +35,15 @@ public class GameView extends SurfaceView implements Runnable{
         super(context);
 
         this.context = context;
+
+        ourHolder = getHolder();
+        paint = new Paint();
+
+        screenX = x;
+        screenY = y;
+
     }
+
 
     @Override
     public void run(){
