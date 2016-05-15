@@ -76,7 +76,7 @@ public class Drop {
 
     public boolean shoot(int direction, int colour, float level) {
         if (!isActive) {
-            speed = 250 + 100*level;
+            speed = 100 + 100*level;
             y = 0;
             color = colour;
             heading = direction;

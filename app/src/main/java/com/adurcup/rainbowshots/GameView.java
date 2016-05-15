@@ -149,15 +149,7 @@ public class GameView extends SurfaceView implements Runnable{
                 if (drop.getStatus()) {
                     if (drop.getImpactPointY() > screenY - buttons[i].getButtonHeight()) {
                         if (drop.getColor() == i) {
-                            if(buttons[i].isTopThresholdReached(screenY)){
-                                paused = true;
-                                levelUp = true;
-                                level++;
-                                buttons[0].reset(screenX, screenY, 0);
-                                buttons[1].reset(screenX, screenY, 1);
-                                buttons[2].reset(screenX, screenY, 2);
-                                buttons[3].reset(screenX, screenY, 3);
-                            }
+                            buttons[i].isTopThresholdReached(screenY);
                         } else {
                             buttons[i].isBottomThresholdReached(screenY);
                         }
@@ -171,6 +163,19 @@ public class GameView extends SurfaceView implements Runnable{
                     }
                 }
             }
+        }
+
+        if(buttons[0].getButtonHeight() >= screenY/2
+                && buttons[1].getButtonHeight() >= screenY /2
+                && buttons[2].getButtonHeight() >= screenY /2
+                && buttons[3].getButtonHeight() >= screenY /2){
+            paused = true;
+            levelUp = true;
+            level++;
+            buttons[0].reset(screenX, screenY, 0);
+            buttons[1].reset(screenX, screenY, 1);
+            buttons[2].reset(screenX, screenY, 2);
+            buttons[3].reset(screenX, screenY, 3);
         }
     }
 
