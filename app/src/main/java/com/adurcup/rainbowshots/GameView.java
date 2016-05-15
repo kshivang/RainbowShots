@@ -23,8 +23,6 @@ public class GameView extends SurfaceView implements Runnable{
 
     private boolean paused = true;
 
-    //private Canvas canvas;
-
     private Paint paint;
 
     private long fps;
