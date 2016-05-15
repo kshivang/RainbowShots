@@ -21,7 +21,7 @@ public class Button {
     private int position = 3;
 
     public Button(int screenX, int screenY, int position) {
-        buttonHeight = screenY / 10;
+        buttonHeight = screenX / 4;
         buttonWidth = screenX / 4;
 
         rect = new RectF();
@@ -53,9 +53,9 @@ public class Button {
         return buttonHeight;
     }
 
-    public Boolean isTopThresholdReached(int screenY){
+    public Boolean isTopThresholdReached(int screenY) {
 
-        if(buttonHeight < screenY / 2) {
+        if (buttonHeight < screenY / 2) {
             buttonHeight = buttonHeight + screenY / 20;
             rect.bottom = screenY - buttonHeight;
             return false;
@@ -63,9 +63,9 @@ public class Button {
         return true;
     }
 
-    public Boolean isBottomThresholdReached(int screenY){
+    public Boolean isBottomThresholdReached(int screenY) {
 
-        if(buttonHeight > screenY / 10) {
+        if (buttonHeight > screenY / 10) {
             buttonHeight = buttonHeight - screenY / 80;
             rect.bottom = screenY - buttonHeight;
             return false;
@@ -73,7 +73,7 @@ public class Button {
         return true;
     }
 
-    public RectF getRect(){
+    public RectF getRect() {
         return rect;
     }
 }

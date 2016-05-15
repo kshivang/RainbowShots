@@ -18,7 +18,7 @@ public class Drop {
 
     // Going nowhere
     int heading = -1;
-    float speed = 1000;
+    float speed = 400;
 
     private int width;
     private int height;
@@ -30,7 +30,6 @@ public class Drop {
     }
 
     private int lane = 0;
-
     private int color = 0;
 
     public int getColor() {
@@ -38,9 +37,8 @@ public class Drop {
     }
 
     public Drop(int screenX, int screenY, int lane) {
-        this.lane = lane;
         height = screenY / 20;
-        width = screenX / 6;
+        width = screenX / 4;
         isActive = false;
         rect = new RectF();
         y = 0;
@@ -55,7 +53,7 @@ public class Drop {
                 x = screenX / 2;
                 break;
             default:
-                x = 3 * screenX / 2;
+                x = 3 * screenX / 4;
         }
     }
 
