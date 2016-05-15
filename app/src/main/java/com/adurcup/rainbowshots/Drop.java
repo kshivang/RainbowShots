@@ -18,7 +18,7 @@ public class Drop {
 
     // Going nowhere
     int heading = -1;
-    float speed = 1000;
+    float speed = 350;
 
     private int width;
     private int height;
@@ -55,7 +55,7 @@ public class Drop {
                 x = screenX / 2;
                 break;
             default:
-                x = 3 * screenX / 2;
+                x = 3 * screenX / 4;
         }
     }
 
@@ -69,6 +69,7 @@ public class Drop {
 
     public void setInactive() {
         isActive = false;
+        y = 0;
     }
 
     public float getImpactPointY() {

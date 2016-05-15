@@ -27,6 +27,7 @@ public class GameView extends SurfaceView implements Runnable{
     private boolean paused = true;
 
     private Canvas canvas;
+
     private Paint paint;
 
     private long fps;
@@ -34,12 +35,15 @@ public class GameView extends SurfaceView implements Runnable{
     private long timeThisFrame;
 
     private int screenX;
+
     private int screenY;
 
     private Button[] buttons = new Button[4];
 
-    private Drop[] drops = new Drop[10];
-    private int maxDrops = 3;
+    private Drop[][] drops = new Drop[10][4];
+    // Maximum drops would be 3, one more than value assigned
+    // as 0 included
+    private int maxDrops = 2;
 
     public GameView(Context context, int x, int y) {
         super(context);
@@ -62,7 +66,9 @@ public class GameView extends SurfaceView implements Runnable{
         }
 
         for(int i = 0; i < drops.length; i++){
-            drops[i] = new Drop(screenX, screenY, 2);
+            for(int j = 0; j < drops[0].length; j++) {
+                drops[i][j] = new Drop(screenX, screenY, i);
+            }
         }
     }
 
@@ -87,55 +93,81 @@ public class GameView extends SurfaceView implements Runnable{
             // time animations and more.
 
             timeThisFrame = System.currentTimeMillis() - startFrameTime;
-            //timeThisFrame = 17;
+//            timeThisFrame = 17;
             if (timeThisFrame >= 1) {
                 fps = 1000 / timeThisFrame;
             }
         }
     }
 
-    int nextDrop = 0; int currentDrop = 0;
-    int rand = 2, randColor = 0;
+    int[] nextDrop = {0, 0, 0, 0};
+    int[] activeDropsCount = {0, 0, 0, 0};
+    int[] previousDrop = {0, 0, 0, 0}, bottomDrop = {0, 0, 0, 0};
+    int randomGap = 2, randColor = 0;
+
     public void update() {
-        // Move the paddle if required
-        for(int i = 0; i < drops.length; i++){
-            if(drops[i].getStatus()) {
-                drops[i].update(fps);
+        // updating all drops position according to frame
+        for(int i = 0; i < 4; i++){
+            for(Drop drop : drops[i]) {
+                if (drop.getStatus()) {
+                    drop.update(fps);
+                }
             }
         }
 
         Random generator = new Random();
 
-        //currentDrop = nextDrop - 1;
-        //if drop is 0 ,i.e. beginning of game, or drop is at random position
-        //trigger new drop
-        if(nextDrop == 0 || (drops[nextDrop-1].getImpactPointY() > rand)) {
-            if (drops[nextDrop].shoot(drops[0].DOWN, randColor)) {
-                randColor = generator.nextInt(4);
-                //rand vary from screen / 4 to screenY / 5
-                rand = generator.nextInt((screenY / 5)) + screenY/4;
-                nextDrop++;
-         //       currentDrop = nextDrop;
-
-                if (nextDrop == maxDrops) {
-                    nextDrop = 1;
-                }
+        // fetching previous drop
+        for(int i = 0; i < 4; i++) {
+            if (nextDrop[i] == 0) {
+                previousDrop[i] = maxDrops;
+            } else {
+                previousDrop[i] = nextDrop[i] - 1;
             }
         }
 
-        for(int i = 0; i < drops.length; i++){
-            if (drops[i].getImpactPointY() > screenY - buttons[2].getButtonHeight()) {
-                if(drops[i].getStatus()) {
-                    if (drops[i].getColor() == 2) {
-                        buttons[2].isTopThresholdReached(screenY);
-                    } else {
-                        buttons[2].isBottomThresholdReached(screenY);
+        // generate or position next drop from the beginning screen
+        // if first Run or previous drop reach the previous value of
+        // value of previous drop reach previous value of randomGap
+        for (int i = 0; i < 4; i++) {
+            if (activeDropsCount[i] == 0 || (drops[i][previousDrop[i]].getImpactPointY() > randomGap)) {
+                if (drops[i][nextDrop[i]].shoot(drops[0][0].DOWN, randColor)) {
+                    activeDropsCount[i]++;
+                    randColor = generator.nextInt(4);
+                    // randomGap between consecutive drops
+                    // vary from screen / 4 to screenY / 5
+                    randomGap = generator.nextInt((screenY / 5)) + screenY / 4;
+                    nextDrop[i]++;
+                    // Maximum of 3 drops would be created in any frame
+                    if (nextDrop[i] > maxDrops) {
+                        nextDrop[i] = 0;
                     }
                 }
-                drops[i].setInactive();
             }
         }
-        // Check for ball colliding with a brick
+
+        // inactivate drop when it hit button
+        for (int i = 0; i < 4; i++) {
+            for (Drop drop : drops[i]) {
+                if (drop.getStatus()) {
+                    if (drop.getImpactPointY() > screenY - buttons[i].getButtonHeight()) {
+                        if (drop.getColor() == i) {
+                            buttons[i].isTopThresholdReached(screenY);
+                        } else {
+                            buttons[i].isBottomThresholdReached(screenY);
+                        }
+                        drop.setInactive();
+                        activeDropsCount[i]--;
+                        if (bottomDrop[i] == maxDrops) {
+                            bottomDrop[i] = 0;
+                        } else {
+                            bottomDrop[i]++;
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
     // Draw the newly updated scene
@@ -149,9 +181,9 @@ public class GameView extends SurfaceView implements Runnable{
             // Draw the background color
             canvas.drawColor(Color.rgb(255, 255, 255));
 
-            // Choose the brush color for drawing
+            // Drawing buttons
             paint.setColor(Color.rgb(255, 0, 114));
-            // Draw the paddle
+
             canvas.drawRect(buttons[0].getRect(), paint);
 
             paint.setColor(Color.rgb(43, 233, 68));
@@ -165,26 +197,29 @@ public class GameView extends SurfaceView implements Runnable{
             paint.setColor(Color.rgb(255, 215, 0));
 
             canvas.drawRect(buttons[3].getRect(), paint);
-            // Change the brush color for drawing
 
-            for(int i = 0; i < drops.length; i++){
-                if(drops[i].getStatus()) {
-                    switch (drops[i].getColor()){
-                        case 0:
-                            paint.setColor(Color.rgb(255, 0, 114));
-                            break;
-                        case 1:
-                            paint.setColor(Color.rgb(43, 233, 68));
-                            break;
-                        case 2:
-                            paint.setColor(Color.rgb(0, 188, 254));
-                            break;
-                        default:
-                            paint.setColor(Color.rgb(255, 215, 0));
+            // Drawing drops color
+            for (int i = 0; i < 4; i++) {
+                for (Drop drop : drops[i]) {
+                    if (drop.getStatus()) {
+                        switch (drop.getColor()) {
+                            case 0:
+                                paint.setColor(Color.rgb(255, 0, 114));
+                                break;
+                            case 1:
+                                paint.setColor(Color.rgb(43, 233, 68));
+                                break;
+                            case 2:
+                                paint.setColor(Color.rgb(0, 188, 254));
+                                break;
+                            default:
+                                paint.setColor(Color.rgb(255, 215, 0));
+                        }
+                        canvas.drawRect(drop.getRect(), paint);
                     }
-                    canvas.drawRect(drops[i].getRect(), paint);
                 }
             }
+
             paint.setTextSize(100);
 
             canvas.drawText("FPS:"+ fps + "  :"+ timeThisFrame + "", 50, 70, paint);
@@ -218,7 +253,15 @@ public class GameView extends SurfaceView implements Runnable{
 
 
                 if(!paused) {
-                    drops[nextDrop].setInactive();
+                    for (int i = 0; i < 4; i++) {
+                        drops[i][bottomDrop[i]].setInactive();
+                        activeDropsCount[i]--;
+                        if (bottomDrop[i] == maxDrops) {
+                            bottomDrop[i] = 0;
+                        } else {
+                            bottomDrop[i]++;
+                        }
+                    }
                 }
 
                 paused = false;
