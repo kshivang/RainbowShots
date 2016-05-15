@@ -11,9 +11,6 @@ import android.view.SurfaceView;
 
 import java.util.Random;
 
-/**
- * Created by kshivang on 15/05/16.
- */
 public class GameView extends SurfaceView implements Runnable{
 
     private Context context;
@@ -26,7 +23,7 @@ public class GameView extends SurfaceView implements Runnable{
 
     private boolean paused = true;
 
-    private Canvas canvas;
+    //private Canvas canvas;
 
     private Paint paint;
 
@@ -167,7 +164,6 @@ public class GameView extends SurfaceView implements Runnable{
                 }
             }
         }
-
     }
 
     // Draw the newly updated scene
@@ -176,7 +172,7 @@ public class GameView extends SurfaceView implements Runnable{
         // Make sure our drawing surface is valid or we crash
         if (ourHolder.getSurface().isValid()) {
             // Lock the canvas ready to draw
-            canvas = ourHolder.lockCanvas();
+            Canvas canvas = ourHolder.lockCanvas();
 
             // Draw the background color
             canvas.drawColor(Color.rgb(255, 255, 255));
@@ -252,40 +248,66 @@ public class GameView extends SurfaceView implements Runnable{
             case MotionEvent.ACTION_DOWN:
 
 
-                if(!paused) {
-                    for (int i = 0; i < 4; i++) {
-                        drops[i][bottomDrop[i]].setInactive();
-                        activeDropsCount[i]--;
-                        if (bottomDrop[i] == maxDrops) {
-                            bottomDrop[i] = 0;
-                        } else {
-                            bottomDrop[i]++;
+                paused = false;
+                float x, y;
+
+                x = motionEvent.getX();
+                y = motionEvent.getY();
+
+                if (x < screenX/4 ) {
+                    if(y > screenY - buttons[0].getButtonHeight()) {
+                        if(!paused) {
+                            drops[0][bottomDrop[0]].setInactive();
+                            activeDropsCount[0]--;
+                            if (bottomDrop[0] == maxDrops) {
+                                bottomDrop[0] = 0;
+                            } else {
+                                bottomDrop[0]++;
+                            }
+                        }
+                    }
+                } else if (x < screenX/2) {
+                    if(y > screenY - buttons[1].getButtonHeight()) {
+                        if(!paused) {
+                            drops[1][bottomDrop[1]].setInactive();
+                            activeDropsCount[1]--;
+                            if (bottomDrop[1] == maxDrops) {
+                                bottomDrop[1] = 0;
+                            } else {
+                                bottomDrop[1]++;
+                            }
+                        }
+                    }
+                } else if (x < ( 3 * screenX / 4)){
+                    if(y > screenY - buttons[2].getButtonHeight()) {
+                        if(!paused) {
+                            drops[2][bottomDrop[2]].setInactive();
+                            activeDropsCount[2]--;
+                            if (bottomDrop[2] == maxDrops) {
+                                bottomDrop[2] = 0;
+                            } else {
+                                bottomDrop[2]++;
+                            }
+                        }
+                    }
+                } else {
+                    if(y > screenY - buttons[3].getButtonHeight()) {
+                        if(!paused) {
+                            drops[3][bottomDrop[3]].setInactive();
+                            activeDropsCount[3]--;
+                            if (bottomDrop[3] == maxDrops) {
+                                bottomDrop[3] = 0;
+                            } else {
+                                bottomDrop[3]++;
+                            }
                         }
                     }
                 }
-
-                paused = false;
-
-                if(motionEvent.getY() > screenY - screenY / 8) {
-                    if (motionEvent.getX() > screenX / 2) {
-
-                    } else {
-                    }
-                }
-
-                if(motionEvent.getY() < screenY - screenY / 8) {
-                    // Shots fired
-                }
-
                 break;
-
-
             // Player has removed finger from screen
             case MotionEvent.ACTION_UP:
 
                 //paused = true;
-                if(motionEvent.getY() > screenY - screenY / 10) {
-                }
                 break;
         }
         return true;
