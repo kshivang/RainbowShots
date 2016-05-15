@@ -25,12 +25,6 @@ public class Drop {
 
     private boolean isActive;
 
-    public int getLane() {
-        return lane;
-    }
-
-    private int lane = 0;
-
     private int color = 0;
 
     public int getColor() {
@@ -38,7 +32,6 @@ public class Drop {
     }
 
     public Drop(int screenX, int screenY, int lane) {
-        this.lane = lane;
         height = screenY / 20;
         width = screenX / 6;
         isActive = false;
@@ -81,8 +74,9 @@ public class Drop {
 
     }
 
-    public boolean shoot(int direction, int colour) {
+    public boolean shoot(int direction, int colour, float level) {
         if (!isActive) {
+            speed = 250 + 100*level;
             y = 0;
             color = colour;
             heading = direction;

@@ -101,6 +101,8 @@ public class GameView extends SurfaceView implements Runnable{
     int[] activeDropsCount = {0, 0, 0, 0};
     int[] previousDrop = {0, 0, 0, 0}, bottomDrop = {0, 0, 0, 0};
     int randomGap = 2, randColor = 0;
+    Boolean levelUp = false;
+    float level = 1;
 
     public void update() {
         // updating all drops position according to frame
@@ -128,7 +130,7 @@ public class GameView extends SurfaceView implements Runnable{
         // value of previous drop reach previous value of randomGap
         for (int i = 0; i < 4; i++) {
             if (activeDropsCount[i] == 0 || (drops[i][previousDrop[i]].getImpactPointY() > randomGap)) {
-                if (drops[i][nextDrop[i]].shoot(drops[0][0].DOWN, randColor)) {
+                if (drops[i][nextDrop[i]].shoot(drops[0][0].DOWN, randColor, level)) {
                     activeDropsCount[i]++;
                     randColor = generator.nextInt(4);
                     // randomGap between consecutive drops
@@ -149,7 +151,15 @@ public class GameView extends SurfaceView implements Runnable{
                 if (drop.getStatus()) {
                     if (drop.getImpactPointY() > screenY - buttons[i].getButtonHeight()) {
                         if (drop.getColor() == i) {
-                            buttons[i].isTopThresholdReached(screenY);
+                            if(buttons[i].isTopThresholdReached(screenY)){
+                                paused = true;
+                                levelUp = true;
+                                level++;
+                                buttons[0].reset(screenX, screenY, 0);
+                                buttons[1].reset(screenX, screenY, 1);
+                                buttons[2].reset(screenX, screenY, 2);
+                                buttons[3].reset(screenX, screenY, 3);
+                            }
                         } else {
                             buttons[i].isBottomThresholdReached(screenY);
                         }
@@ -216,9 +226,14 @@ public class GameView extends SurfaceView implements Runnable{
                 }
             }
 
-            paint.setTextSize(100);
+            paint.setTextSize(screenX / 10);
 
-            canvas.drawText("FPS:"+ fps + "  :"+ timeThisFrame + "", 50, 70, paint);
+            canvas.drawText("Level:"+ (int)level, screenX / 20, screenY / 20, paint);
+
+            if (levelUp){
+                paint.setTextSize(screenX / 6);
+                canvas.drawText("Level Cleared!", screenX / 20, screenY/2, paint);
+            }
             // Draw everything to the screen
             ourHolder.unlockCanvasAndPost(canvas);
         }
@@ -246,9 +261,8 @@ public class GameView extends SurfaceView implements Runnable{
 
             // Player has touched the screen
             case MotionEvent.ACTION_DOWN:
-
-
                 paused = false;
+                levelUp = false;
                 float x, y;
 
                 x = motionEvent.getX();
