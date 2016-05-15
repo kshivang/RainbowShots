@@ -18,47 +18,72 @@ public class Drop {
 
     // Going nowhere
     int heading = -1;
-    float speed =  350;
+    float speed = 1000;
 
     private int width;
     private int height;
 
     private boolean isActive;
 
-    public Drop(int screenX, int screenY) {
+    public int getLane() {
+        return lane;
+    }
 
+    private int lane = 0;
+
+    private int color = 0;
+
+    public int getColor() {
+        return color;
+    }
+
+    public Drop(int screenX, int screenY, int lane) {
+        this.lane = lane;
         height = screenY / 20;
-        width = screenX /6;
+        width = screenX / 6;
         isActive = false;
-
         rect = new RectF();
+        y = 0;
+        switch (lane) {
+            case 0:
+                x = 0;
+                break;
+            case 1:
+                x = screenX / 4;
+                break;
+            case 2:
+                x = screenX / 2;
+                break;
+            default:
+                x = 3 * screenX / 2;
+        }
     }
 
-    public RectF getRect(){
-        return  rect;
+    public RectF getRect() {
+        return rect;
     }
 
-    public boolean getStatus(){
+    public boolean getStatus() {
         return isActive;
     }
 
-    public void setInactive(){
+    public void setInactive() {
         isActive = false;
     }
 
-    public float getImpactPointY(){
-        if (heading == DOWN){
+    public float getImpactPointY() {
+        if (heading == DOWN) {
             return y + height;
-        }else{
-            return  y;
+        } else {
+            return y;
         }
 
     }
 
-    public boolean shoot(float startX, float startY, int direction) {
+    public boolean shoot(int direction, int colour) {
         if (!isActive) {
-            x = startX;
-            y = startY;
+            y = 0;
+            color = colour;
             heading = direction;
             isActive = true;
             return true;
@@ -68,12 +93,12 @@ public class Drop {
         return false;
     }
 
-    public void update(long fps){
+    public void update(long fps) {
 
         // Just move up or down
-        if(heading == UP){
+        if (heading == UP) {
             y = y - speed / fps;
-        }else{
+        } else {
             y = y + speed / fps;
         }
 
