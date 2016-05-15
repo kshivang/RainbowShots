@@ -123,6 +123,8 @@ public class GameView extends SurfaceView implements Runnable{
             }
         }
 
+        int nitin = 4;
+
         for(int i = 0; i < drops.length; i++){
             if (drops[i].getImpactPointY() > screenY - buttons[2].getButtonHeight()) {
                 if(drops[i].getStatus()) {
