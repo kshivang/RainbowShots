@@ -11,7 +11,7 @@ import android.view.SurfaceView;
 
 import java.util.Random;
 
-public class GameView extends SurfaceView implements Runnable{
+public class GameView extends SurfaceView implements Runnable {
 
     private Context context;
 
@@ -55,13 +55,13 @@ public class GameView extends SurfaceView implements Runnable{
 
     }
 
-    private void prepareLevel(){
-        for(int i = 0; i < buttons.length; i++){
+    private void prepareLevel() {
+        for (int i = 0; i < buttons.length; i++) {
             buttons[i] = new Button(screenX, screenY, i);
         }
 
-        for(int i = 0; i < drops.length; i++){
-            for(int j = 0; j < drops[0].length; j++) {
+        for (int i = 0; i < drops.length; i++) {
+            for (int j = 0; j < drops[0].length; j++) {
                 drops[i][j] = new Drop(screenX, screenY, i);
             }
         }
@@ -76,7 +76,7 @@ public class GameView extends SurfaceView implements Runnable{
 
             // Update the frame
             // Update the frame
-            if(!paused){
+            if (!paused) {
                 update();
             }
 
@@ -104,8 +104,8 @@ public class GameView extends SurfaceView implements Runnable{
 
     public void update() {
         // updating all drops position according to frame
-        for(int i = 0; i < 4; i++){
-            for(Drop drop : drops[i]) {
+        for (int i = 0; i < 4; i++) {
+            for (Drop drop : drops[i]) {
                 if (drop.getStatus()) {
                     drop.update(fps);
                 }
@@ -115,7 +115,7 @@ public class GameView extends SurfaceView implements Runnable{
         Random generator = new Random();
 
         // fetching previous drop
-        for(int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
             if (nextDrop[i] == 0) {
                 previousDrop[i] = maxDrops;
             } else {
@@ -151,7 +151,7 @@ public class GameView extends SurfaceView implements Runnable{
                         if (drop.getColor() == i) {
                             buttons[i].isTopThresholdReached(screenY);
                         } else {
-                            buttons[i].isBottomThresholdReached(screenY);
+                            buttons[i].isBottomThresholdReached(screenY, screenX);
                         }
                         drop.setInactive();
                         activeDropsCount[i]--;
@@ -165,10 +165,10 @@ public class GameView extends SurfaceView implements Runnable{
             }
         }
 
-        if(buttons[0].getButtonHeight() >= screenY/2
-                && buttons[1].getButtonHeight() >= screenY /2
-                && buttons[2].getButtonHeight() >= screenY /2
-                && buttons[3].getButtonHeight() >= screenY /2){
+        if (buttons[0].getButtonHeight() >= screenY / 2
+                && buttons[1].getButtonHeight() >= screenY / 2
+                && buttons[2].getButtonHeight() >= screenY / 2
+                && buttons[3].getButtonHeight() >= screenY / 2) {
             paused = true;
             levelUp = true;
             level++;
@@ -229,20 +229,60 @@ public class GameView extends SurfaceView implements Runnable{
                 }
             }
 
+            //background seperating lines
+            paint.setColor(Color.GRAY);
+            canvas.drawRect((screenX / 4) - 1, 0, (screenX / 4) + 1, screenY, paint);
+            canvas.drawRect((2 * screenX / 4) - 1, 0, (2 * screenX / 4) + 1, screenY, paint);
+            canvas.drawRect((3 * screenX / 4) - 1, 0, (3 * screenX / 4) + 1, screenY, paint);
+
+            //Outter most white circle
+            paint.setColor(Color.WHITE);
+            canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 13, paint);
+            canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 13, paint);
+            canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 8) - 13, paint);
+            canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 13, paint);
+
+            //inner colored circle to show as a fine ring
+            paint.setColor(Color.rgb(255, 0, 114));
+            canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 17, paint);
+            paint.setColor(Color.rgb(43, 233, 68));
+            canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 17, paint);
+            paint.setColor(Color.rgb(0, 188, 254));
+            canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 8) - 17, paint);
+            paint.setColor(Color.rgb(255, 215, 0));
+            canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 17, paint);
+
+            //inner thicker white dome
+            paint.setColor(Color.WHITE);
+            canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 70, paint);
+            canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 70, paint);
+            canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 8) - 70, paint);
+            canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 70, paint);
+
+            //inner colored to make a hole in the inner ring
+            paint.setColor(Color.rgb(255, 0, 114));
+            canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+            paint.setColor(Color.rgb(43, 233, 68));
+            canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+            paint.setColor(Color.rgb(0, 188, 254));
+            canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+            paint.setColor(Color.rgb(255, 215, 0));
+            canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+
             paint.setTextSize(screenX / 10);
 
-            canvas.drawText("Level:"+ (int)level, screenX / 20, screenY / 20, paint);
+            canvas.drawText("Level:" + (int) level, screenX / 20, screenY / 20, paint);
 
-            if (levelUp){
+            if (levelUp) {
                 paint.setTextSize(screenX / 8);
-                canvas.drawText("Level Cleared!", screenX / 20, screenY/2, paint);
+                canvas.drawText("Level Cleared!", screenX / 20, screenY / 2, paint);
             }
             // Draw everything to the screen
             ourHolder.unlockCanvasAndPost(canvas);
         }
     }
 
-    public void pause(){
+    public void pause() {
         playing = false;
         try {
             gameThread.join();
@@ -271,9 +311,9 @@ public class GameView extends SurfaceView implements Runnable{
                 x = motionEvent.getX();
                 y = motionEvent.getY();
 
-                if (x < screenX/4 ) {
-                    if(y > screenY - buttons[0].getButtonHeight()) {
-                        if(!paused) {
+                if (x < screenX / 4) {
+                    if (y > screenY - buttons[0].getButtonHeight()) {
+                        if (!paused) {
                             drops[0][bottomDrop[0]].setInactive();
                             activeDropsCount[0]--;
                             if (bottomDrop[0] == maxDrops) {
@@ -283,9 +323,9 @@ public class GameView extends SurfaceView implements Runnable{
                             }
                         }
                     }
-                } else if (x < screenX/2) {
-                    if(y > screenY - buttons[1].getButtonHeight()) {
-                        if(!paused) {
+                } else if (x < screenX / 2) {
+                    if (y > screenY - buttons[1].getButtonHeight()) {
+                        if (!paused) {
                             drops[1][bottomDrop[1]].setInactive();
                             activeDropsCount[1]--;
                             if (bottomDrop[1] == maxDrops) {
@@ -295,9 +335,9 @@ public class GameView extends SurfaceView implements Runnable{
                             }
                         }
                     }
-                } else if (x < ( 3 * screenX / 4)){
-                    if(y > screenY - buttons[2].getButtonHeight()) {
-                        if(!paused) {
+                } else if (x < (3 * screenX / 4)) {
+                    if (y > screenY - buttons[2].getButtonHeight()) {
+                        if (!paused) {
                             drops[2][bottomDrop[2]].setInactive();
                             activeDropsCount[2]--;
                             if (bottomDrop[2] == maxDrops) {
@@ -308,8 +348,8 @@ public class GameView extends SurfaceView implements Runnable{
                         }
                     }
                 } else {
-                    if(y > screenY - buttons[3].getButtonHeight()) {
-                        if(!paused) {
+                    if (y > screenY - buttons[3].getButtonHeight()) {
+                        if (!paused) {
                             drops[3][bottomDrop[3]].setInactive();
                             activeDropsCount[3]--;
                             if (bottomDrop[3] == maxDrops) {

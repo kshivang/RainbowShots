@@ -42,7 +42,7 @@ public class Button {
     }
 
     public void reset(int screenX, int screenY, int position) {
-        buttonHeight = screenY / 10;
+        buttonHeight = screenX / 4;
         buttonWidth = screenX / 4;
 
         rect.top = screenY;
@@ -68,9 +68,9 @@ public class Button {
         }
     }
 
-    public Boolean isBottomThresholdReached(int screenY){
+    public Boolean isBottomThresholdReached(int screenY, int screenX){
 
-        if(buttonHeight > screenY / 10) {
+        if(buttonHeight > screenX / 4) {
             buttonHeight = buttonHeight - screenY / 80;
             rect.bottom = screenY - buttonHeight;
             return false;
