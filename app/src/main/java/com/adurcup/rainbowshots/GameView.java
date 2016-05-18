@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
 
 import java.util.Random;
 
@@ -18,6 +19,8 @@ public class GameView extends SurfaceView implements Runnable {
     private Thread gameThread = null;
 
     private SurfaceHolder ourHolder;
+
+    private Canvas canvas;
 
     private volatile boolean playing;
 
@@ -35,7 +38,7 @@ public class GameView extends SurfaceView implements Runnable {
 
     private Button[] buttons = new Button[4];
 
-    private Drop[][] drops = new Drop[10][4];
+    private Drop[][] drops = new Drop[10][10];
     // Maximum drops would be 3, one more than value assigned
     // as 0 included
     private int maxDrops = 2;
@@ -66,6 +69,7 @@ public class GameView extends SurfaceView implements Runnable {
             }
         }
     }
+
 
     @Override
     public void run() {
@@ -185,7 +189,8 @@ public class GameView extends SurfaceView implements Runnable {
         // Make sure our drawing surface is valid or we crash
         if (ourHolder.getSurface().isValid()) {
             // Lock the canvas ready to draw
-            Canvas canvas = ourHolder.lockCanvas();
+
+            canvas = ourHolder.lockCanvas();
 
             // Draw the background color
             canvas.drawColor(Color.rgb(255, 255, 255));
@@ -229,13 +234,13 @@ public class GameView extends SurfaceView implements Runnable {
                 }
             }
 
-            //background seperating lines
+            //background separating lines
             paint.setColor(Color.GRAY);
             canvas.drawRect((screenX / 4) - 1, 0, (screenX / 4) + 1, screenY, paint);
             canvas.drawRect((2 * screenX / 4) - 1, 0, (2 * screenX / 4) + 1, screenY, paint);
             canvas.drawRect((3 * screenX / 4) - 1, 0, (3 * screenX / 4) + 1, screenY, paint);
 
-            //Outter most white circle
+            //Outer most white circle
             paint.setColor(Color.WHITE);
             canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 13, paint);
             canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 13, paint);
@@ -272,6 +277,8 @@ public class GameView extends SurfaceView implements Runnable {
             paint.setTextSize(screenX / 10);
 
             canvas.drawText("Level:" + (int) level, screenX / 20, screenY / 20, paint);
+
+            canvas.drawText("active @2:" + activeDropsCount[1], screenX / 20, screenY / 10, paint);
 
             if (levelUp) {
                 paint.setTextSize(screenX / 8);
@@ -311,7 +318,7 @@ public class GameView extends SurfaceView implements Runnable {
                 x = motionEvent.getX();
                 y = motionEvent.getY();
 
-                if (x < screenX / 4) {
+                if (activeDropsCount[0] > 0 && x < screenX / 4) {
                     if (y > screenY - buttons[0].getButtonHeight()) {
                         if (!paused) {
                             drops[0][bottomDrop[0]].setInactive();
@@ -323,7 +330,7 @@ public class GameView extends SurfaceView implements Runnable {
                             }
                         }
                     }
-                } else if (x < screenX / 2) {
+                } else if (activeDropsCount[1] > 0 && x < screenX / 2) {
                     if (y > screenY - buttons[1].getButtonHeight()) {
                         if (!paused) {
                             drops[1][bottomDrop[1]].setInactive();
@@ -335,7 +342,7 @@ public class GameView extends SurfaceView implements Runnable {
                             }
                         }
                     }
-                } else if (x < (3 * screenX / 4)) {
+                } else if (activeDropsCount[2] > 0 && x < (3 * screenX / 4)) {
                     if (y > screenY - buttons[2].getButtonHeight()) {
                         if (!paused) {
                             drops[2][bottomDrop[2]].setInactive();
@@ -348,7 +355,7 @@ public class GameView extends SurfaceView implements Runnable {
                         }
                     }
                 } else {
-                    if (y > screenY - buttons[3].getButtonHeight()) {
+                    if (activeDropsCount[3] > 0 && y > screenY - buttons[3].getButtonHeight()) {
                         if (!paused) {
                             drops[3][bottomDrop[3]].setInactive();
                             activeDropsCount[3]--;
@@ -364,7 +371,7 @@ public class GameView extends SurfaceView implements Runnable {
             // Player has removed finger from screen
             case MotionEvent.ACTION_UP:
 
-                //paused = true;
+               // paused = true;
                 break;
         }
         return true;
