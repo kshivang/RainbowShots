@@ -3,6 +3,7 @@ package com.adurcup.rainbowshots;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -229,16 +230,29 @@ public class GameView extends SurfaceView implements Runnable {
                             default:
                                 paint.setColor(Color.rgb(255, 215, 0));
                         }
-                        canvas.drawRect(drop.getRect(), paint);
+                        canvas.drawCircle(drop.getRect().centerX(), drop.getRect().centerY(), screenX / 10, paint);
+                        paint.setColor(Color.WHITE);
+                        canvas.drawCircle(drop.getRect().centerX(), drop.getRect().centerY() + 2 * screenX / 30, screenX / 30, paint);
+                        paint.setColor(Color.BLACK);
+                        canvas.drawCircle(drop.getRect().centerX(), drop.getRect().centerY() + 9 * screenX / 120, screenX / 60, paint);
                     }
                 }
             }
 
             //background separating lines
             paint.setColor(Color.GRAY);
-            canvas.drawRect((screenX / 4) - 1, 0, (screenX / 4) + 1, screenY, paint);
-            canvas.drawRect((2 * screenX / 4) - 1, 0, (2 * screenX / 4) + 1, screenY, paint);
-            canvas.drawRect((3 * screenX / 4) - 1, 0, (3 * screenX / 4) + 1, screenY, paint);
+            paint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
+
+
+            canvas.drawLine((screenX / 4) - 1, 0, (screenX / 4) + 1, screenY, paint);
+            canvas.drawLine((2 * screenX / 4) - 1, 0, (2 * screenX / 4) + 1, screenY, paint);
+            canvas.drawLine((3 * screenX / 4) - 1, 0, (3 * screenX / 4) + 1, screenY, paint);
+            canvas.drawLine(0, screenY / 2 - 1, 3 * screenX / 8 , screenY / 2 + 1, paint);
+            canvas.drawLine(5 * screenX / 8, screenY / 2 - 1, screenX , screenY / 2 + 1, paint);
+
+            paint.setTextSize(screenX / 30);
+            paint.setColor(Color.BLACK);
+            canvas.drawText("Fill bars up to this", 3 * screenX / 8, screenY / 2 + screenX / 60 , paint);
 
             //Outer most white circle
             paint.setColor(Color.WHITE);
@@ -369,7 +383,7 @@ public class GameView extends SurfaceView implements Runnable {
             // Player has removed finger from screen
             case MotionEvent.ACTION_UP:
 
-               // paused = true;
+                // paused = true;
                 break;
         }
         return true;
