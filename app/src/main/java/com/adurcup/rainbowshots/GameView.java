@@ -278,8 +278,6 @@ public class GameView extends SurfaceView implements Runnable {
 
             canvas.drawText("Level:" + (int) level, screenX / 20, screenY / 20, paint);
 
-            canvas.drawText("active @2:" + activeDropsCount[1], screenX / 20, screenY / 10, paint);
-
             if (levelUp) {
                 paint.setTextSize(screenX / 8);
                 canvas.drawText("Level Cleared!", screenX / 20, screenY / 2, paint);
