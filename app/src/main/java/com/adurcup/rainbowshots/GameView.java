@@ -107,7 +107,6 @@ public class GameView extends SurfaceView implements Runnable {
             // time animations and more.
 
             long timeThisFrame = System.currentTimeMillis() - startFrameTime;
-//            long timeThisFrame = 50;
             if (timeThisFrame >= 1) {
                 fps = 1000 / timeThisFrame;
             }
@@ -282,18 +281,34 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 70, paint);
 
             //inner colored to make a hole in the inner ring
-            paint.setColor(ContextCompat.getColor(getContext(), colorBlueDrop));
-            canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 99, paint);
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
-            canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 99, paint);
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
-            canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 8) - 99, paint);
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorGreenDrop));
-            canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+            if (!buttonPressed[0]) {
+                paint.setColor(ContextCompat.getColor(getContext(), colorBlueDrop));
+                canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+            }
+            if (!buttonPressed[1]) {
+                paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
+                canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+            }
+            if (!buttonPressed[2]) {
+                paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
+                canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+            }
+            if (!buttonPressed[3]) {
+                paint.setColor(ContextCompat.getColor(getContext(), R.color.colorGreenDrop));
+                canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+            }
 
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorGreenDrop));
             paint.setTextSize(screenX / 10);
 
             canvas.drawText("Level:" + (int) level, screenX / 20, screenY / 20, paint);
+
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorBlueDrop));
+            paint.setTextSize(screenX/10);
+            if (paused)
+                canvas.drawText("▶",  37 * screenX / 80, screenY / 20, paint);
+            else
+                canvas.drawText("| |",  37 * screenX / 80, screenY / 20, paint);
 
             if (levelUp) {
                 paint.setTextSize(screenX / 8);
@@ -320,6 +335,8 @@ public class GameView extends SurfaceView implements Runnable {
         gameThread.start();
     }
 
+    boolean buttonPressed[] = {false, false, false, false, false};
+
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
 
@@ -327,15 +344,17 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Player has touched the screen
             case MotionEvent.ACTION_DOWN:
-                paused = false;
                 levelUp = false;
                 float x, y;
 
                 x = motionEvent.getX();
                 y = motionEvent.getY();
 
+                paused = y < screenY / 20 && !paused;
+
                 if (activeDropsCount[0] > 0 && x < screenX / 4) {
                     if (y > screenY - buttons[0].getButtonHeight()) {
+
                         if (!paused) {
                             drops[0][bottomDrop[0]].setInactive();
                             activeDropsCount[0]--;
@@ -344,6 +363,7 @@ public class GameView extends SurfaceView implements Runnable {
                             } else {
                                 bottomDrop[0]++;
                             }
+                            buttonPressed[0] = true;
                         }
                     }
                 } else if (activeDropsCount[1] > 0 && x < screenX / 2) {
@@ -356,6 +376,8 @@ public class GameView extends SurfaceView implements Runnable {
                             } else {
                                 bottomDrop[1]++;
                             }
+
+                            buttonPressed[1] = true;
                         }
                     }
                 } else if (activeDropsCount[2] > 0 && x < (3 * screenX / 4)) {
@@ -368,6 +390,7 @@ public class GameView extends SurfaceView implements Runnable {
                             } else {
                                 bottomDrop[2]++;
                             }
+                            buttonPressed[2] = true;
                         }
                     }
                 } else {
@@ -380,13 +403,17 @@ public class GameView extends SurfaceView implements Runnable {
                             } else {
                                 bottomDrop[3]++;
                             }
+                            buttonPressed[3] = true;
                         }
                     }
                 }
                 break;
             // Player has removed finger from screen
             case MotionEvent.ACTION_UP:
-
+                buttonPressed[0] = false;
+                buttonPressed[1] = false;
+                buttonPressed[2] = false;
+                buttonPressed[3] = false;
                 // paused = true;
                 break;
         }
