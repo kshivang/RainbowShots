@@ -78,6 +78,17 @@ public class GameView extends SurfaceView implements Runnable {
             buttons[i] = new Button(screenX, screenY, i);
         }
 
+        randomCloudGap[0] = screenX / 8;
+        randomCloudGap[1] = screenX / 4 - ((screenX / 15) - 13);
+        randomCloudGap[2] = (screenX / 15) - 13;
+        randomCloudGap[3] = (screenX / 15) - 30;
+        randomCloudGap[4] = screenX / 15 - 20;
+        randomCloudGap[5] = screenX / 9;
+        randomCloudGap[6] = screenX / 10;
+        randomCloudGap[7] = screenX / 12;
+        randomCloudGap[8] = screenX / 13;
+        randomCloudGap[9] = screenX / 15 - 25;
+
         for (int i = 0; i < drops.length; i++) {
             for (int j = 0; j < drops[0].length; j++) {
                 drops[i][j] = new Drop(screenX, i);
@@ -117,9 +128,12 @@ public class GameView extends SurfaceView implements Runnable {
     int[] activeDropsCount = {0, 0, 0, 0};
     int[] previousDrop = {0, 0, 0, 0}, bottomDrop = {0, 0, 0, 0};
     int randomGap = 2, randColor = 0;
+    int randomCloudGap[] = new int[10];
+
     Boolean levelUp = false;
     float level = 1;
 
+    boolean[] variable = {true, false, true, false, true, false, false, true, false, false};
     public void update() {
         // updating all drops position according to frame
         for (int i = 0; i < 4; i++) {
@@ -141,10 +155,36 @@ public class GameView extends SurfaceView implements Runnable {
             }
         }
 
+        for (int i = 0; i < 10; i ++) {
+            int gap = generator.nextInt(screenX / 400);
+            if (variable[i]) {
+                if (i != 0)
+                    randomCloudGap[i] = randomCloudGap[i] + gap;
+                else
+                    randomCloudGap[i] = randomCloudGap[i] + gap;
+                if (randomCloudGap[i] > screenX / 4 - ((screenX / 15) - 13)) {
+                    variable[i] = false;
+                    randomCloudGap[i] = randomCloudGap[i] - gap;
+                }
+            } else {
+                if (i != 0)
+                    randomCloudGap[i] = randomCloudGap[i] - gap;
+                else
+                    randomCloudGap[i] = randomCloudGap[i] - gap;
+                if (randomCloudGap[i] < ((screenX / 15) - 13)) {
+                    variable[i] = true;
+                    randomCloudGap[i] = randomCloudGap[i] + gap;
+                }
+            }
+        }
+
         // generate or position next drop from the beginning screen
         // if first Run or previous drop reach the previous value of
         // value of previous drop reach previous value of randomGap
+
         for (int i = 0; i < 4; i++) {
+
+
             if (activeDropsCount[i] == 0 ||
                     (drops[i][previousDrop[i]].getImpactPointY() > randomGap)) {
                 if (drops[i][nextDrop[i]].shoot(drops[0][0].DOWN, randColor, level, getContext())) {
@@ -214,18 +254,54 @@ public class GameView extends SurfaceView implements Runnable {
             paint.setColor(ContextCompat.getColor(getContext(), colorBlueDrop));
 
             canvas.drawRect(buttons[0].getRect(), paint);
+            canvas.drawCircle(screenX / 4 - ((screenX / 15 ) - 13),
+                    screenY + 13 - buttons[0].getButtonHeight(), (screenX / 15 ) - 13, paint);
+            canvas.drawCircle((screenX / 15 ) - 13,
+                    screenY + 26 - buttons[0].getButtonHeight(), (screenX / 15 ) - 13, paint);
+            for (int i = 0; i < 9; i++) {
+                canvas.drawCircle(randomCloudGap[i],
+                        screenY - buttons[0].getButtonHeight(),
+                        (screenX / (15 + i)) - 13, paint);
+            }
 
             paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
 
             canvas.drawRect(buttons[1].getRect(), paint);
+            canvas.drawCircle(screenX / 2 - ((screenX / 15 ) - 13),
+                    screenY + 20 - buttons[1].getButtonHeight(), (screenX / 15 ) - 13, paint);
+            canvas.drawCircle(screenX/ 4 + (screenX / 15 ) - 13,
+                    screenY + 10- buttons[1].getButtonHeight(), (screenX / 15 ) - 13, paint);
+            for (int i = 0; i < 9; i++) {
+                canvas.drawCircle(screenX / 4 + randomCloudGap[(i + 3) % 10],
+                        screenY - buttons[1].getButtonHeight(),
+                        (screenX / (15 + i)) - 13, paint);
+            }
 
             paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
 
             canvas.drawRect(buttons[2].getRect(), paint);
+            canvas.drawCircle(3 * screenX / 4 - ((screenX / 15 ) - 13),
+                    screenY + 5 - buttons[2].getButtonHeight(), (screenX / 15 ) - 13, paint);
+            canvas.drawCircle(screenX / 2 + (screenX / 15 ) - 13,
+                    screenY + 25- buttons[2].getButtonHeight(), (screenX / 15 ) - 13, paint);
+            for (int i = 0; i < 9; i++) {
+                canvas.drawCircle(screenX / 2 + randomCloudGap[(i + 7) % 10],
+                        screenY - buttons[2].getButtonHeight(),
+                        (screenX / (15 + i)) - 13, paint);
+            }
 
             paint.setColor(ContextCompat.getColor(getContext(), R.color.colorGreenDrop));
 
             canvas.drawRect(buttons[3].getRect(), paint);
+            canvas.drawCircle(screenX  - ((screenX / 15 ) - 13),
+                    screenY + 10 - buttons[3].getButtonHeight(), (screenX / 15 ) - 13, paint);
+            canvas.drawCircle(3 * screenX / 4 + (screenX / 15 ) - 13,
+                    screenY + 20- buttons[3].getButtonHeight(), (screenX / 15 ) - 13, paint);
+            for (int i = 0; i < 9; i++) {
+                canvas.drawCircle(3 * screenX / 4 + randomCloudGap[(i + 5) % 10],
+                        screenY - buttons[3].getButtonHeight(),
+                        (screenX / (15 + i)) - 13, paint);
+            }
 
             // Drawing drops color
             for (int i = 0; i < 4; i++) {
@@ -306,9 +382,9 @@ public class GameView extends SurfaceView implements Runnable {
             paint.setColor(ContextCompat.getColor(getContext(), R.color.colorBlueDrop));
             paint.setTextSize(screenX/10);
             if (paused)
-                canvas.drawText("▶",  37 * screenX / 80, screenY / 20, paint);
+                canvas.drawText("▶",  36 * screenX / 80, screenY / 20, paint);
             else
-                canvas.drawText("| |",  37 * screenX / 80, screenY / 20, paint);
+                canvas.drawText("\u23F8",  141 * screenX / 320, screenY / 20, paint);
 
             if (levelUp) {
                 paint.setTextSize(screenX / 8);
