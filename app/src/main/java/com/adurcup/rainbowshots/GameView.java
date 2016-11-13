@@ -7,6 +7,7 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
@@ -38,10 +39,10 @@ public class GameView extends SurfaceView implements Runnable {
 
     private Button[] buttons = new Button[4];
 
-    private Drop[][] drops = new Drop[4][10];
+    private Drop[][] drops = new Drop[4][11];
     // Maximum drops would be 3, one more than value assigned
     // as 0 included
-    private int maxDrops = 2;
+    private int maxDrops = 10;
 
 
     Rect frameToDraw;
@@ -234,8 +235,10 @@ public class GameView extends SurfaceView implements Runnable {
                     if (drop.getStatus()) {
                         paint.setColor(ContextCompat
                                 .getColor(getContext(), drop.getColor()));
-                        canvas.drawBitmap(drop.getBitmap(),
-                                frameToDraw, drop.getRecF(), paint);
+
+                        Drawable drawable = drop.getDrawable();
+                        drawable.setBounds(drop.getRecF());
+                        drawable.draw(canvas);
                     }
                 }
             }

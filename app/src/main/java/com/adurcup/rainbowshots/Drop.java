@@ -1,9 +1,9 @@
 package com.adurcup.rainbowshots;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.RectF;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 
 /**
  * Created by kshivang on 15/05/16.
@@ -14,7 +14,7 @@ class Drop {
     private float x;
     private float y;
 
-    private RectF rect;
+    private Rect rect;
 
     // Which way is it shooting
     private final int UP = 0;
@@ -43,7 +43,7 @@ class Drop {
         return color;
     }
 
-    private Bitmap bitmap;
+    private Drawable drawable;
 
     Drop(int screenX, int lane) {
         reset(screenX, lane);
@@ -57,7 +57,7 @@ class Drop {
         isActive = false;
         y = 0;
         if (rect == null)
-            rect = new RectF();
+            rect = new Rect();
         else {
             rect.top = (2 * height / 7);
             rect.bottom = (5 * height / 7);
@@ -78,7 +78,7 @@ class Drop {
         }
     }
 
-    RectF getRecF() {
+    Rect getRecF() {
         return rect;
     }
 
@@ -101,8 +101,8 @@ class Drop {
 
     }
 
-    Bitmap getBitmap() {
-        return bitmap;
+    Drawable getDrawable() {
+        return drawable;
     }
 
     boolean shoot(int direction, int randColor, float level, Context context) {
@@ -113,29 +113,21 @@ class Drop {
             switch (randColor) {
                 case 1:
                     color = R.color.colorYellowDrop;
-                    bitmap = BitmapFactory
-                            .decodeResource(context.getResources(), R.drawable.yellow000);
+                    drawable = ContextCompat.getDrawable(context, R.drawable.yellow000);
                     break;
                 case 2:
                     color = R.color.colorPinkDrop;
-                    bitmap = BitmapFactory
-                            .decodeResource(context.getResources(), R.drawable.pink000);
+                    drawable = ContextCompat.getDrawable(context, R.drawable.pink000);
                     break;
                 case 3:
-                    bitmap = BitmapFactory
-                            .decodeResource(context.getResources(), R.drawable.green000);
+                    drawable = ContextCompat.getDrawable(context, R.drawable.green000);
                     color = R.color.colorGreenDrop;
                     break;
                 default:
-                    bitmap = BitmapFactory
-                            .decodeResource(context.getResources(), R.drawable.blue000);
                     color = R.color.colorBlueDrop;
+                    drawable = ContextCompat.getDrawable(context, R.drawable.blue000);
             }
 
-            bitmap = Bitmap.createScaledBitmap(bitmap,
-                    width * 4 / 5,
-                    height * 4 / 5,
-                    false);
             heading = direction;
             isActive = true;
             return true;
@@ -155,10 +147,10 @@ class Drop {
         }
 
         // Update rect
-        rect.left = x + (2 * width / 7);
-        rect.right = x + (5 * width / 7) ;
-        rect.top = y + (2 * height / 7);
-        rect.bottom = y + (5 * height / 7);
+        rect.left = (int) x + (2 * width / 7);
+        rect.right = (int) x + (5 * width / 7) ;
+        rect.top = (int) y + (2 * height / 7);
+        rect.bottom = (int) y + (5 * height / 7);
 
     }
 }
