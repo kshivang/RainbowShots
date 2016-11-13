@@ -1,8 +1,6 @@
 package com.adurcup.rainbowshots;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
@@ -17,6 +15,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.Random;
+
+import static com.adurcup.rainbowshots.R.color.colorBlueDrop;
 
 public class GameView extends SurfaceView implements Runnable {
 
@@ -38,12 +38,11 @@ public class GameView extends SurfaceView implements Runnable {
 
     private Button[] buttons = new Button[4];
 
-    private Drop[][] drops = new Drop[10][10];
+    private Drop[][] drops = new Drop[4][10];
     // Maximum drops would be 3, one more than value assigned
     // as 0 included
     private int maxDrops = 2;
 
-    Bitmap bitmapBlueDrop, bitmapYellowDrop, bitmapPinkDrop, bitmapGreenDrop;
 
     Rect frameToDraw;
 
@@ -64,37 +63,6 @@ public class GameView extends SurfaceView implements Runnable {
         int frameHeight = screenX / 5;
         int frameWidth = screenX / 5;
 
-        bitmapBlueDrop = BitmapFactory
-                .decodeResource(this.getResources(), R.drawable.blue_drops);
-        bitmapYellowDrop = BitmapFactory
-                .decodeResource(this.getResources(), R.drawable.yellow_drop);
-        bitmapPinkDrop = BitmapFactory
-                .decodeResource(this.getResources(), R.drawable.pink_drop);
-        bitmapGreenDrop = BitmapFactory
-                .decodeResource(this.getResources(), R.drawable.green_drop);
-
-
-        // Scale the bitmap to the correct size
-        // We need to do this because Android automatically
-        // scales bitmaps based on screen density
-        int frameCount = 9;
-        bitmapBlueDrop = Bitmap.createScaledBitmap(bitmapBlueDrop,
-                frameWidth * frameCount,
-//                frameWidth * frameCount,
-                frameHeight,
-                false);
-        bitmapYellowDrop = Bitmap.createScaledBitmap(bitmapYellowDrop,
-                frameWidth * frameCount,
-                frameHeight,
-                false);
-        bitmapPinkDrop = Bitmap.createScaledBitmap(bitmapPinkDrop,
-                frameWidth * frameCount,
-                frameHeight,
-                false);
-        bitmapGreenDrop = Bitmap.createScaledBitmap(bitmapGreenDrop,
-                frameWidth * frameCount,
-                frameHeight,
-                false);
 
         frameToDraw = new Rect(
                 0,
@@ -112,7 +80,7 @@ public class GameView extends SurfaceView implements Runnable {
 
         for (int i = 0; i < drops.length; i++) {
             for (int j = 0; j < drops[0].length; j++) {
-                drops[i][j] = new Drop(screenX, screenY, i);
+                drops[i][j] = new Drop(screenX, i);
             }
         }
     }
@@ -139,7 +107,7 @@ public class GameView extends SurfaceView implements Runnable {
             // time animations and more.
 
             long timeThisFrame = System.currentTimeMillis() - startFrameTime;
-//            timeThisFrame = 17;
+         //   long timeThisFrame = 10;
             if (timeThisFrame >= 1) {
                 fps = 1000 / timeThisFrame;
             }
@@ -180,7 +148,7 @@ public class GameView extends SurfaceView implements Runnable {
         for (int i = 0; i < 4; i++) {
             if (activeDropsCount[i] == 0 ||
                     (drops[i][previousDrop[i]].getImpactPointY() > randomGap)) {
-                if (drops[i][nextDrop[i]].shoot(drops[0][0].DOWN, randColor, level)) {
+                if (drops[i][nextDrop[i]].shoot(drops[0][0].DOWN, randColor, level, getContext())) {
                     activeDropsCount[i]++;
                     randColor = generator.nextInt(4);
                     // randomGap between consecutive drops
@@ -198,20 +166,19 @@ public class GameView extends SurfaceView implements Runnable {
         // inactivate drop when it hit button
         for (int i = 0; i < 4; i++) {
             for (Drop drop : drops[i]) {
-                if (drop.getStatus()) {
-                    if (drop.getImpactPointY() > screenY - buttons[i].getButtonHeight()) {
-                        if (drop.getColor() == i) {
-                            buttons[i].isTopThresholdReached(screenY);
-                        } else {
-                            buttons[i].isBottomThresholdReached(screenY, screenX);
-                        }
-                        drop.setInactive();
-                        activeDropsCount[i]--;
-                        if (bottomDrop[i] == maxDrops) {
-                            bottomDrop[i] = 0;
-                        } else {
-                            bottomDrop[i]++;
-                        }
+                if (drop.getStatus() &&
+                        (drop.getImpactPointY() > screenY - buttons[i].getButtonHeight())) {
+                    if (drop.getColorState() == i) {
+                        buttons[i].isTopThresholdReached(screenY);
+                    } else {
+                        buttons[i].isBottomThresholdReached(screenY, screenX);
+                    }
+                    drop.setInactive();
+                    activeDropsCount[i]--;
+                    if (bottomDrop[i] == maxDrops) {
+                        bottomDrop[i] = 0;
+                    } else {
+                        bottomDrop[i]++;
                     }
                 }
             }
@@ -245,7 +212,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Drawing buttons
 
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorBlueDrop));
+            paint.setColor(ContextCompat.getColor(getContext(), colorBlueDrop));
 
             canvas.drawRect(buttons[0].getRect(), paint);
 
@@ -265,44 +232,10 @@ public class GameView extends SurfaceView implements Runnable {
             for (int i = 0; i < 4; i++) {
                 for (Drop drop : drops[i]) {
                     if (drop.getStatus()) {
-                        switch (drop.getColor()) {
-                            case 0:
-                                paint.setColor(ContextCompat
-                                        .getColor(getContext(), R.color.colorBlueDrop));
-                                canvas.drawBitmap(bitmapBlueDrop,
-                                        frameToDraw, drop.getRecF(), paint);
-                                break;
-                            case 1:
-                                paint.setColor(ContextCompat
-                                        .getColor(getContext(), R.color.colorYellowDrop));
-                                canvas.drawBitmap(bitmapYellowDrop,
-                                        frameToDraw, drop.getRecF(), paint);
-                                break;
-                            case 2:
-                                paint.setColor(ContextCompat
-                                        .getColor(getContext(), R.color.colorPinkDrop));
-                                canvas.drawBitmap(bitmapPinkDrop,
-                                        frameToDraw, drop.getRecF(), paint);
-                                break;
-                            default:
-                                paint.setColor(ContextCompat
-                                        .getColor(getContext(), R.color.colorGreenDrop));
-                                canvas.drawBitmap(bitmapGreenDrop,
-                                        frameToDraw, drop.getRecF(), paint);
-                        }
-
-//                        canvas.drawRect(drop.getRecF(), paint);
-//
-//                        canvas.drawCircle(drop.getRecF().centerX(),
-//                                drop.getRecF().centerY(), screenX / 10, paint);
-//                        paint.setColor(Color.WHITE);
-//                        canvas.drawCircle(drop.getRecF().centerX(),
-//                                drop.getRecF().centerY() + 2 * screenX / 30, screenX / 30, paint);
-//                        paint.setColor(Color.BLACK);
-//                        canvas.drawCircle(drop.getRecF().centerX(),
-//                               drop.getRecF().centerY() + 9 * screenX / 120, screenX / 60, paint);
-
-
+                        paint.setColor(ContextCompat
+                                .getColor(getContext(), drop.getColor()));
+                        canvas.drawBitmap(drop.getBitmap(),
+                                frameToDraw, drop.getRecF(), paint);
                     }
                 }
             }
@@ -329,7 +262,7 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 13, paint);
 
             //inner colored circle to show as a fine ring
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorBlueDrop));
+            paint.setColor(ContextCompat.getColor(getContext(), colorBlueDrop));
             canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 17, paint);
             paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
             canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 17, paint);
@@ -346,7 +279,7 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 70, paint);
 
             //inner colored to make a hole in the inner ring
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorBlueDrop));
+            paint.setColor(ContextCompat.getColor(getContext(), colorBlueDrop));
             canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 99, paint);
             paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
             canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 99, paint);
