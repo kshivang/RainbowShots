@@ -1,9 +1,7 @@
 package com.adurcup.rainbowshots;
 
 import android.app.Activity;
-import android.graphics.Point;
 import android.os.Bundle;
-import android.view.Display;
 
 public class GameActivity extends Activity {
 
@@ -13,11 +11,7 @@ public class GameActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-
-        gameView = new GameView(this, size.x, size.y);
+        gameView = new GameView(this);
         setContentView(gameView);
 
     }

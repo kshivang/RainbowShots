@@ -4,8 +4,9 @@ import android.graphics.RectF;
 
 /**
  * Created by kshivang on 15/05/16.
+ *
  */
-public class Drop {
+class Drop {
 
     private float x;
     private float y;
@@ -13,12 +14,12 @@ public class Drop {
     private RectF rect;
 
     // Which way is it shooting
-    public final int UP = 0;
-    public final int DOWN = 1;
+    private final int UP = 0;
+    final int DOWN = 1;
 
     // Going nowhere
-    int heading = -1;
-    float speed = 350;
+    private int heading = -1;
+    private float speed = 350;
 
     private int width;
     private int height;
@@ -27,11 +28,11 @@ public class Drop {
 
     private int color = 0;
 
-    public int getColor() {
+    int getColor() {
         return color;
     }
 
-    public Drop(int screenX, int screenY, int lane) {
+    Drop(int screenX, int screenY, int lane) {
         height = screenY / 20;
         width = screenX / 4;
         isActive = false;
@@ -52,20 +53,20 @@ public class Drop {
         }
     }
 
-    public RectF getRect() {
+    RectF getRecF() {
         return rect;
     }
 
-    public boolean getStatus() {
+    boolean getStatus() {
         return isActive;
     }
 
-    public void setInactive() {
+    void setInactive() {
         isActive = false;
         y = 0;
     }
 
-    public float getImpactPointY() {
+    float getImpactPointY() {
         if (heading == DOWN) {
             return y + height;
         } else {
@@ -74,7 +75,7 @@ public class Drop {
 
     }
 
-    public boolean shoot(int direction, int colour, float level) {
+    boolean shoot(int direction, int colour, float level) {
         if (!isActive) {
             speed = 100 + 100*level;
             y = 0;
@@ -88,7 +89,7 @@ public class Drop {
         return false;
     }
 
-    public void update(long fps) {
+    void update(long fps) {
 
         // Just move up or down
         if (heading == UP) {
