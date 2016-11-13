@@ -80,6 +80,7 @@ public class GameView extends SurfaceView implements Runnable {
         int frameCount = 9;
         bitmapBlueDrop = Bitmap.createScaledBitmap(bitmapBlueDrop,
                 frameWidth * frameCount,
+//                frameWidth * frameCount,
                 frameHeight,
                 false);
         bitmapYellowDrop = Bitmap.createScaledBitmap(bitmapYellowDrop,

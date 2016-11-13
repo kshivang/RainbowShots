@@ -33,7 +33,8 @@ class Drop {
     }
 
     Drop(int screenX, int screenY, int lane) {
-        height = screenY / 20;
+//        height = screenY / 20;
+        height = screenX / 4;
         width = screenX / 4;
         isActive = false;
         rect = new RectF();
