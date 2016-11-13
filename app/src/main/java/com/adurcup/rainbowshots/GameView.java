@@ -127,7 +127,7 @@ public class GameView extends SurfaceView implements Runnable {
         for (int i = 0; i < 4; i++) {
             for (Drop drop : drops[i]) {
                 if (drop.getStatus()) {
-                    drop.update(fps);
+                    drop.update(fps, getContext());
                 }
             }
         }
