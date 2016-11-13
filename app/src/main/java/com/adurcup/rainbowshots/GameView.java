@@ -3,7 +3,6 @@ package com.adurcup.rainbowshots;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -108,7 +107,7 @@ public class GameView extends SurfaceView implements Runnable {
             // time animations and more.
 
             long timeThisFrame = System.currentTimeMillis() - startFrameTime;
-         //   long timeThisFrame = 10;
+//            long timeThisFrame = 50;
             if (timeThisFrame >= 1) {
                 fps = 1000 / timeThisFrame;
             }
@@ -244,17 +243,18 @@ public class GameView extends SurfaceView implements Runnable {
             }
             //background separating lines
             paint.setColor(Color.GRAY);
-            paint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
+//            paint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
 
             canvas.drawLine((screenX / 4) - 1, 0, (screenX / 4) + 1, screenY, paint);
             canvas.drawLine((2 * screenX / 4) - 1, 0, (2 * screenX / 4) + 1, screenY, paint);
             canvas.drawLine((3 * screenX / 4) - 1, 0, (3 * screenX / 4) + 1, screenY, paint);
+
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
             canvas.drawLine(0, screenY / 2 - 1, 3 * screenX / 8 , screenY / 2 + 1, paint);
             canvas.drawLine(5 * screenX / 8, screenY / 2 - 1, screenX , screenY / 2 + 1, paint);
 
             paint.setTextSize(screenX / 30);
-            paint.setColor(Color.BLACK);
-            canvas.drawText("Fill bars up to this",
+            canvas.drawText("WIN THE SHOTS",
                     3 * screenX / 8, screenY / 2 + screenX / 60 , paint);
 
             //Outer most white circle

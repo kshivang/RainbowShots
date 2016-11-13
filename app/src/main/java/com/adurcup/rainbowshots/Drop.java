@@ -3,9 +3,8 @@ package com.adurcup.rainbowshots;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
-
-import static com.adurcup.rainbowshots.R.drawable.blue002;
 
 /**
  * Created by kshivang on 15/05/16.
@@ -50,10 +49,11 @@ class Drop {
     }
 
     private Drawable drawable;
+    private Drawable drawArray[][] = new Drawable[4][9];
 
     Drop(int screenX, int lane) {
         drawRes[0][0] = R.drawable.blue000;
-        drawRes[0][1] = blue002;
+        drawRes[0][1] = R.drawable.blue002;
         drawRes[0][2] = R.drawable.blue005;
         drawRes[0][3] = R.drawable.blue007;
         drawRes[0][4] = R.drawable.blue009;
@@ -152,7 +152,7 @@ class Drop {
         return drawable;
     }
 
-    boolean shoot(int direction, int randColor, float level, Context context) {
+    boolean shoot(int direction, int randColor, float level, final Context context) {
         if (!isActive) {
             speed = 100 + 100*level;
             y = 0;
@@ -162,6 +162,19 @@ class Drop {
 
             heading = direction;
             isActive = true;
+            new AsyncTask<Void, Void, Void>(){
+                protected Void doInBackground(Void... params){
+                    for (int i = 0; i < 4; i++) {
+                        drawArray[i] = new Drawable[9];
+                    }
+                    for (int i = 0; i < 9; i++) {
+                        drawArray[colorState][i] = ContextCompat.getDrawable(context,
+                                drawRes[colorState][i]);
+                    }
+                    return null;
+                }
+            }.execute();
+
             return true;
         }
 
@@ -173,8 +186,10 @@ class Drop {
     void update(long fps, Context context) {
 
         if(notActiveState > 0) {
-            drawable = ContextCompat.getDrawable(context,
-                    drawRes[colorState][9 - notActiveState]);
+            drawable = drawArray[colorState][9 - notActiveState];
+            if (drawable == null)
+                drawable = ContextCompat.getDrawable(context,
+                        drawRes[colorState][9 - notActiveState]);
             notActiveState--;
             heading = -1;
         } else if(notActiveState == 0) {
