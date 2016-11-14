@@ -228,10 +228,10 @@ public class GameView extends SurfaceView implements Runnable {
             }
         }
 
-        if (buttons[0].getButtonHeight() >= screenY / 2
-                && buttons[1].getButtonHeight() >= screenY / 2
-                && buttons[2].getButtonHeight() >= screenY / 2
-                && buttons[3].getButtonHeight() >= screenY / 2) {
+        if (buttons[0].getButtonHeight() >= 2 * screenY / 3
+                && buttons[1].getButtonHeight() >= 2 * screenY / 3
+                && buttons[2].getButtonHeight() >= 2 * screenY / 3
+                && buttons[3].getButtonHeight() >= 2 * screenY / 3) {
             paused = true;
             levelUp = true;
             level++;
