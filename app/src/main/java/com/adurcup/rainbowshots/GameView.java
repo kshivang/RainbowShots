@@ -254,8 +254,29 @@ public class GameView extends SurfaceView implements Runnable {
             // Draw the background color
             canvas.drawColor(Color.WHITE);
 
-            // Drawing buttons
 
+
+            // Drawing drops color
+            for (int i = 0; i < 4; i++) {
+                for (Drop drop : drops[i]) {
+                    if (drop.getStatus()) {
+                        paint.setColor(
+                                getColor(getContext(), drop.getColor()));
+
+                        canvas.drawCircle(drop.getRecF().centerX(), drop.getRecF().centerY(),
+                                screenX / 18, paint);
+
+                        paint.setColor(Color.WHITE);
+                        if (drop.getNotActiveState() >= 0) {
+                            canvas.drawCircle(drop.getRecF().centerX(), drop.getRecF().centerY(),
+                                    (9 - drop.getNotActiveState()) *(screenX / 162) ,
+                                    paint);
+                        }
+                    }
+                }
+            }
+
+            // Drawing buttons
             paint.setColor(getColor(getContext(), colorYellowDrop));
 
             canvas.drawRect(buttons[0].getRect(), paint);
@@ -308,25 +329,6 @@ public class GameView extends SurfaceView implements Runnable {
                         (screenX / (15 + i)) - 13, paint);
             }
 
-            // Drawing drops color
-            for (int i = 0; i < 4; i++) {
-                for (Drop drop : drops[i]) {
-                    if (drop.getStatus()) {
-                        paint.setColor(
-                                getColor(getContext(), drop.getColor()));
-
-                        canvas.drawCircle(drop.getRecF().centerX(), drop.getRecF().centerY(),
-                                screenX / 18, paint);
-
-                        paint.setColor(Color.WHITE);
-                        if (drop.getNotActiveState() >= 0) {
-                            canvas.drawCircle(drop.getRecF().centerX(), drop.getRecF().centerY(),
-                                    (9 - drop.getNotActiveState()) *(screenX / 162) ,
-                                    paint);
-                        }
-                    }
-                }
-            }
             //background separating lines
             paint.setColor(Color.GRAY);
 //            paint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
