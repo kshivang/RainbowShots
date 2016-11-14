@@ -420,7 +420,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             canvas.drawText("Level:" + (int) level, screenX / 40, screenY / 20, paint);
 
-            paint.setColor(getColor(getContext(), R.color.colorBlueDrop));
+            paint.setColor(getColor(getContext(), R.color.colorYellowDrop));
             paint.setTextSize(screenX/10);
             if (paused) {
                 canvas.drawText("▶", 36 * screenX / 80, screenY / 20, paint);
