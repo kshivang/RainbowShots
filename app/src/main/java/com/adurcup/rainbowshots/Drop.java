@@ -54,12 +54,7 @@ class Drop {
 
         isActive = false;
         y = 0;
-        if (rect == null)
-            rect = new Rect();
-        else {
-            rect.top = (2 * height / 7);
-            rect.bottom = (5 * height / 7);
-        }
+        if (rect == null) rect = new Rect();
 
         switch (lane) {
             case 0:
@@ -74,6 +69,11 @@ class Drop {
             default:
                 x = 3 * screenX / 4;
         }
+
+        rect.left = (int) x + (2 * width / 7);
+        rect.right = (int) x + (5 * width / 7) ;
+        rect.top = (int) y + (2 * height / 7);
+        rect.bottom = (int) y + (5 * height / 7);
     }
 
     Rect getRecF() {

@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.Display;
@@ -39,13 +38,25 @@ public class GameView extends SurfaceView implements Runnable {
 
     private Button[] buttons = new Button[4];
 
-    private Drop[][] drops = new Drop[4][4];
+    private Drop[][] drops;
     // Maximum drops would be 3, one more than value assigned
     // as 0 included
     private int maxDrops = 3;
 
 
-    Rect frameToDraw;
+    int[] nextDrop = new int[4], activeDropsCount = new int[4],
+            previousDrop = new int[4], bottomDrop = new int[4];
+    int randomGap = 2, randColor = 0;
+    int randomCloudGap[] = new int[10];
+    boolean gameOver = false;
+
+    private Boolean levelUp = true;
+    private int level = 1;
+    private Integer cutOffLevel;
+
+    private boolean[] variable = {true, false, true, false, true, false, false, true, false, false};
+
+    private long maxTime = 0;
 
     public GameView (Context context) {
         super(context);
@@ -64,21 +75,13 @@ public class GameView extends SurfaceView implements Runnable {
         screenX = size.x;
         screenY = size.y;
 
-        int frameHeight = screenX / 5;
-        int frameWidth = screenX / 5;
-
-
-        frameToDraw = new Rect(
-                0,
-                0,
-                frameWidth,
-                frameHeight);
-
         prepareLevel();
     }
 
     private void prepareLevel() {
 
+        maxTime = (120 * 1000) + maxTime - totalTimeThisLevel;
+        totalTimeThisLevel = 0;
         if (cutOffLevel == null || cutOffLevel < 2 * screenY/3) {
             cutOffLevel = screenY / 6 + (level * screenY / 18);
         }
@@ -102,14 +105,17 @@ public class GameView extends SurfaceView implements Runnable {
         randomCloudGap[8] = screenX / 13;
         randomCloudGap[9] = screenX / 15 - 25;
 
-        for (int i = 0; i < drops.length; i++) {
-            for (int j = 0; j < drops[0].length; j++) {
+        if (drops == null) {
+            drops = new Drop[4][4];
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
                 drops[i][j] = new Drop(screenX, i);
             }
         }
     }
 
-
+    long totalTimeThisLevel = 0;
     @Override
     public void run() {
         while (playing) {
@@ -133,20 +139,17 @@ public class GameView extends SurfaceView implements Runnable {
             long timeThisFrame = System.currentTimeMillis() - startFrameTime;
             if (timeThisFrame >= 1) {
                 fps = 1000 / timeThisFrame;
+            } else fps = 35;
+            if (!paused) {
+                totalTimeThisLevel += timeThisFrame;
+                if (totalTimeThisLevel >= maxTime) {
+                    gameOver = true;
+                    paused = true;
+                }
             }
         }
     }
 
-    int[] nextDrop = new int[4], activeDropsCount = new int[4],
-            previousDrop = new int[4], bottomDrop = new int[4];
-    int randomGap = 2, randColor = 0;
-    int randomCloudGap[] = new int[10];
-
-    private Boolean levelUp = true;
-    private int level = 1;
-    private Integer cutOffLevel;
-
-    boolean[] variable = {true, false, true, false, true, false, false, true, false, false};
     public void update() {
         // updating all drops position according to frame
         for (int i = 0; i < 4; i++) {
@@ -428,15 +431,24 @@ public class GameView extends SurfaceView implements Runnable {
 
             canvas.drawText("Level:" + level, screenX / 40, screenY / 20, paint);
 
+            paint.setColor(getColor(getContext(), R.color.colorBlueDrop));
+            if (totalTimeThisLevel < maxTime) {
+                canvas.drawText(secToTime((maxTime - totalTimeThisLevel) / 1000),
+                        3 * screenX / 4, screenY / 20, paint);
+            } else {
+                canvas.drawText("Time Up", 3 * screenX / 4, screenY / 20, paint);
+                canvas.drawText("Game Over!", screenX / 4, screenY / 3, paint);
+            }
+
             paint.setColor(getColor(getContext(), R.color.colorYellowDrop));
             paint.setTextSize(screenX/10);
             if (paused) {
                 canvas.drawText("▶", 36 * screenX / 80, screenY / 20, paint);
                 paint.setTextSize(screenX / 9);
-                if (!levelUp)
-                    canvas.drawText("Paused", screenX / 2 - (10 *screenX / 45), screenY / 2, paint);
-                else
+                if (levelUp || gameOver)
                     canvas.drawText("Start", screenX / 2 - (screenX / 8), screenY / 2, paint);
+                else
+                    canvas.drawText("Paused", screenX / 2 - (10 *screenX / 45), screenY / 2, paint);
             }
             else {
                 canvas.drawText("\u23F8", 141 * screenX / 320, screenY / 20, paint);
@@ -446,6 +458,10 @@ public class GameView extends SurfaceView implements Runnable {
             if (levelUp && level != 1) {
                 paint.setTextSize(screenX / 15);
                 canvas.drawText("Level Cleared!", screenX / 4, screenY / 3, paint);
+                paint.setColor(getColor(getContext(), R.color.colorBlueDrop));
+                canvas.drawText("Bonus +" +
+                        secToTime((maxTime / 1000) - 120),
+                        screenX / 4, 5 * screenY / 12, paint);
             }
             // Draw everything to the screen
             ourHolder.unlockCanvasAndPost(canvas);
@@ -477,68 +493,74 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Player has touched the screen
             case MotionEvent.ACTION_DOWN:
-                levelUp = false;
-                float x, y;
 
-                x = motionEvent.getX();
-                y = motionEvent.getY();
+                if (!gameOver) {
+                    levelUp = false;
+                    float x, y;
 
-                paused = y < screenY / 20 && !paused;
+                    x = motionEvent.getX();
+                    y = motionEvent.getY();
 
-                if (activeDropsCount[0] > 0 && x < screenX / 4) {
-                    if (y > screenY - buttons[0].getButtonHeight()) {
+                    paused = y < screenY / 20 && !paused;
 
-                        if (!paused) {
-                            drops[0][bottomDrop[0]].setInactive();
-                            activeDropsCount[0]--;
-                            if (bottomDrop[0] == maxDrops) {
-                                bottomDrop[0] = 0;
-                            } else {
-                                bottomDrop[0]++;
+                    if (activeDropsCount[0] > 0 && x < screenX / 4) {
+                        if (y > screenY - buttons[0].getButtonHeight()) {
+
+                            if (!paused) {
+                                drops[0][bottomDrop[0]].setInactive();
+                                activeDropsCount[0]--;
+                                if (bottomDrop[0] == maxDrops) {
+                                    bottomDrop[0] = 0;
+                                } else {
+                                    bottomDrop[0]++;
+                                }
+                                buttonPressed[0] = true;
                             }
-                            buttonPressed[0] = true;
                         }
-                    }
-                } else if (activeDropsCount[1] > 0 && x < screenX / 2) {
-                    if (y > screenY - buttons[1].getButtonHeight()) {
-                        if (!paused) {
-                            drops[1][bottomDrop[1]].setInactive();
-                            activeDropsCount[1]--;
-                            if (bottomDrop[1] == maxDrops) {
-                                bottomDrop[1] = 0;
-                            } else {
-                                bottomDrop[1]++;
-                            }
+                    } else if (activeDropsCount[1] > 0 && x < screenX / 2) {
+                        if (y > screenY - buttons[1].getButtonHeight()) {
+                            if (!paused) {
+                                drops[1][bottomDrop[1]].setInactive();
+                                activeDropsCount[1]--;
+                                if (bottomDrop[1] == maxDrops) {
+                                    bottomDrop[1] = 0;
+                                } else {
+                                    bottomDrop[1]++;
+                                }
 
-                            buttonPressed[1] = true;
-                        }
-                    }
-                } else if (activeDropsCount[2] > 0 && x < (3 * screenX / 4)) {
-                    if (y > screenY - buttons[2].getButtonHeight()) {
-                        if (!paused) {
-                            drops[2][bottomDrop[2]].setInactive();
-                            activeDropsCount[2]--;
-                            if (bottomDrop[2] == maxDrops) {
-                                bottomDrop[2] = 0;
-                            } else {
-                                bottomDrop[2]++;
+                                buttonPressed[1] = true;
                             }
-                            buttonPressed[2] = true;
+                        }
+                    } else if (activeDropsCount[2] > 0 && x < (3 * screenX / 4)) {
+                        if (y > screenY - buttons[2].getButtonHeight()) {
+                            if (!paused) {
+                                drops[2][bottomDrop[2]].setInactive();
+                                activeDropsCount[2]--;
+                                if (bottomDrop[2] == maxDrops) {
+                                    bottomDrop[2] = 0;
+                                } else {
+                                    bottomDrop[2]++;
+                                }
+                                buttonPressed[2] = true;
+                            }
+                        }
+                    } else {
+                        if (activeDropsCount[3] > 0 && y > screenY - buttons[3].getButtonHeight()) {
+                            if (!paused) {
+                                drops[3][bottomDrop[3]].setInactive();
+                                activeDropsCount[3]--;
+                                if (bottomDrop[3] == maxDrops) {
+                                    bottomDrop[3] = 0;
+                                } else {
+                                    bottomDrop[3]++;
+                                }
+                                buttonPressed[3] = true;
+                            }
                         }
                     }
                 } else {
-                    if (activeDropsCount[3] > 0 && y > screenY - buttons[3].getButtonHeight()) {
-                        if (!paused) {
-                            drops[3][bottomDrop[3]].setInactive();
-                            activeDropsCount[3]--;
-                            if (bottomDrop[3] == maxDrops) {
-                                bottomDrop[3] = 0;
-                            } else {
-                                bottomDrop[3]++;
-                            }
-                            buttonPressed[3] = true;
-                        }
-                    }
+                    level = 1;
+                    prepareLevel();
                 }
                 break;
             // Player has removed finger from screen
@@ -549,7 +571,22 @@ public class GameView extends SurfaceView implements Runnable {
                 buttonPressed[3] = false;
                 // paused = true;
                 break;
+
         }
         return true;
+    }
+
+    private String secToTime(long sec) {
+        long hr = sec / 3600;
+        String stHr = (Long.toString(hr + 100)).substring(1);
+        sec = sec % 3600;
+        long min = sec / 60;
+        String stMin = (Long.toString(min + 100)).substring(1);
+        sec = sec % 60;
+        String stSec = (Long.toString(sec + 100)).substring(1);
+        if (hr == 0) {
+            return (stMin + ":" + stSec);
+        }
+        return (stHr + ":" + stMin + ":" + stSec);
     }
 }
