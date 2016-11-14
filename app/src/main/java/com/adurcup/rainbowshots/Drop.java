@@ -2,9 +2,6 @@ package com.adurcup.rainbowshots;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.support.v4.content.ContextCompat;
 
 /**
  * Created by kshivang on 15/05/16.
@@ -14,7 +11,6 @@ class Drop {
 
     private float x;
     private float y;
-    private int drawRes[][] = new int[4][9];
 
     private Rect rect;
 
@@ -22,8 +18,8 @@ class Drop {
     private final int UP = 0;
     final int DOWN = 1;
 
-    private int colorChooser[] = {R.color.colorBlueDrop, R.color.colorYellowDrop,
-            R.color.colorPinkDrop, R.color.colorGreenDrop};
+    private int colorChooser[] = {R.color.colorYellowDrop, R.color.colorBlueDrop,
+            R.color.colorGreenDrop, R.color.colorPinkDrop};
 
     // Going nowhere
     private int heading = -1;
@@ -48,50 +44,7 @@ class Drop {
         return color;
     }
 
-    private Drawable drawable;
-    private Drawable drawArray[][] = new Drawable[4][9];
-
     Drop(int screenX, int lane) {
-        drawRes[0][0] = R.drawable.blue000;
-        drawRes[0][1] = R.drawable.blue002;
-        drawRes[0][2] = R.drawable.blue005;
-        drawRes[0][3] = R.drawable.blue007;
-        drawRes[0][4] = R.drawable.blue009;
-        drawRes[0][5] = R.drawable.blue010;
-        drawRes[0][6] = R.drawable.blue011;
-        drawRes[0][7] = R.drawable.blue012;
-        drawRes[0][8] = R.drawable.blue013;
-
-        drawRes[1][0] = R.drawable.yellow000;
-        drawRes[1][1] = R.drawable.yellow002;
-        drawRes[1][2] = R.drawable.yellow005;
-        drawRes[1][3] = R.drawable.yellow007;
-        drawRes[1][4] = R.drawable.yellow009;
-        drawRes[1][5] = R.drawable.yellow010;
-        drawRes[1][6] = R.drawable.yellow011;
-        drawRes[1][7] = R.drawable.yellow012;
-        drawRes[1][8] = R.drawable.yellow013;
-
-        drawRes[2][0] = R.drawable.pink000;
-        drawRes[2][1] = R.drawable.pink002;
-        drawRes[2][2] = R.drawable.pink005;
-        drawRes[2][3] = R.drawable.pink007;
-        drawRes[2][4] = R.drawable.pink009;
-        drawRes[2][5] = R.drawable.pink010;
-        drawRes[2][6] = R.drawable.pink011;
-        drawRes[2][7] = R.drawable.pink012;
-        drawRes[2][8] = R.drawable.pink013;
-
-        drawRes[3][0] = R.drawable.green000;
-        drawRes[3][1] = R.drawable.green002;
-        drawRes[3][2] = R.drawable.green005;
-        drawRes[3][3] = R.drawable.green007;
-        drawRes[3][4] = R.drawable.green009;
-        drawRes[3][5] = R.drawable.green010;
-        drawRes[3][6] = R.drawable.green011;
-        drawRes[3][7] = R.drawable.green012;
-        drawRes[3][8] = R.drawable.green013;
-
         reset(screenX, lane);
     }
 
@@ -133,10 +86,7 @@ class Drop {
     }
 
     void setInactive() {
-        notActiveState = 9;
-//        y = 0;
-//        reset(width * 4, lane);
-//        isActive = false;
+        notActiveState = 8;
     }
 
     float getImpactPointY() {
@@ -148,33 +98,15 @@ class Drop {
 
     }
 
-    Drawable getDrawable() {
-        return drawable;
-    }
-
     boolean shoot(int direction, int randColor, float level, final Context context) {
         if (!isActive) {
             speed = 100 + 100*level;
             y = 0;
             colorState = randColor;
-            drawable = ContextCompat.getDrawable(context, drawRes[randColor][0]);
             color = colorChooser[randColor];
 
             heading = direction;
             isActive = true;
-            new AsyncTask<Void, Void, Void>(){
-                protected Void doInBackground(Void... params){
-                    for (int i = 0; i < 4; i++) {
-                        drawArray[i] = new Drawable[9];
-                    }
-                    for (int i = 0; i < 9; i++) {
-                        drawArray[colorState][i] = ContextCompat.getDrawable(context,
-                                drawRes[colorState][i]);
-                    }
-                    return null;
-                }
-            }.execute();
-
             return true;
         }
 
@@ -182,14 +114,14 @@ class Drop {
         return false;
     }
 
+    int getNotActiveState() {
+        return notActiveState;
+    }
+
     private int notActiveState = -1;
-    void update(long fps, Context context) {
+    void update(long fps) {
 
         if(notActiveState > 0) {
-            drawable = drawArray[colorState][9 - notActiveState];
-            if (drawable == null)
-                drawable = ContextCompat.getDrawable(context,
-                        drawRes[colorState][9 - notActiveState]);
             notActiveState--;
             heading = -1;
         } else if(notActiveState == 0) {

@@ -7,8 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -17,7 +16,8 @@ import android.view.SurfaceView;
 
 import java.util.Random;
 
-import static com.adurcup.rainbowshots.R.color.colorBlueDrop;
+import static android.support.v4.content.ContextCompat.getColor;
+import static com.adurcup.rainbowshots.R.color.colorYellowDrop;
 
 public class GameView extends SurfaceView implements Runnable {
 
@@ -57,6 +57,9 @@ public class GameView extends SurfaceView implements Runnable {
 
         ourHolder = getHolder();
         paint = new Paint();
+        Typeface tf =Typeface.createFromAsset(context.getAssets(),"fonts/arial_black.ttf");
+        paint.setTypeface(tf);
+
 
         screenX = size.x;
         screenY = size.y;
@@ -141,7 +144,7 @@ public class GameView extends SurfaceView implements Runnable {
         for (int i = 0; i < 4; i++) {
             for (Drop drop : drops[i]) {
                 if (drop.getStatus()) {
-                    drop.update(fps, getContext());
+                    drop.update(fps);
                 }
             }
         }
@@ -253,7 +256,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Drawing buttons
 
-            paint.setColor(ContextCompat.getColor(getContext(), colorBlueDrop));
+            paint.setColor(getColor(getContext(), colorYellowDrop));
 
             canvas.drawRect(buttons[0].getRect(), paint);
             canvas.drawCircle(screenX / 4 - ((screenX / 15 ) - 13),
@@ -266,7 +269,7 @@ public class GameView extends SurfaceView implements Runnable {
                         (screenX / (15 + i)) - 13, paint);
             }
 
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
+            paint.setColor(getColor(getContext(), R.color.colorBlueDrop));
 
             canvas.drawRect(buttons[1].getRect(), paint);
             canvas.drawCircle(screenX / 2 - ((screenX / 15 ) - 13),
@@ -279,7 +282,7 @@ public class GameView extends SurfaceView implements Runnable {
                         (screenX / (15 + i)) - 13, paint);
             }
 
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
+            paint.setColor(getColor(getContext(), R.color.colorGreenDrop));
 
             canvas.drawRect(buttons[2].getRect(), paint);
             canvas.drawCircle(3 * screenX / 4 - ((screenX / 15 ) - 13),
@@ -292,7 +295,7 @@ public class GameView extends SurfaceView implements Runnable {
                         (screenX / (15 + i)) - 13, paint);
             }
 
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorGreenDrop));
+            paint.setColor(getColor(getContext(), R.color.colorPinkDrop));
 
             canvas.drawRect(buttons[3].getRect(), paint);
             canvas.drawCircle(screenX  - ((screenX / 15 ) - 13),
@@ -309,12 +312,18 @@ public class GameView extends SurfaceView implements Runnable {
             for (int i = 0; i < 4; i++) {
                 for (Drop drop : drops[i]) {
                     if (drop.getStatus()) {
-                        paint.setColor(ContextCompat
-                                .getColor(getContext(), drop.getColor()));
+                        paint.setColor(
+                                getColor(getContext(), drop.getColor()));
 
-                        Drawable drawable = drop.getDrawable();
-                        drawable.setBounds(drop.getRecF());
-                        drawable.draw(canvas);
+                        canvas.drawCircle(drop.getRecF().centerX(), drop.getRecF().centerY(),
+                                screenX / 18, paint);
+
+                        paint.setColor(Color.WHITE);
+                        if (drop.getNotActiveState() >= 0) {
+                            canvas.drawCircle(drop.getRecF().centerX(), drop.getRecF().centerY(),
+                                    (9 - drop.getNotActiveState()) *(screenX / 162) ,
+                                    paint);
+                        }
                     }
                 }
             }
@@ -326,13 +335,13 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawLine((2 * screenX / 4) + 1, 0, (2 * screenX / 4) + 1, screenY, paint);
             canvas.drawLine((3 * screenX / 4) + 1, 0, (3 * screenX / 4) + 1, screenY, paint);
 
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
+            paint.setColor(getColor(getContext(), R.color.colorPinkDrop));
             paint.setStrokeWidth(1.4f);
             canvas.drawLine(0, screenY / 3 + 1, screenX , screenY / 3 + 1, paint);
 
-            Point a = new Point(0, screenY / 3 - 25);
-            Point b = new Point(0, screenY / 3 + 25);
-            Point c = new Point(43, screenY / 3);
+            Point a = new Point(0, screenY / 3 - 20);
+            Point b = new Point(0, screenY / 3 + 20);
+            Point c = new Point(38, screenY / 3);
 
             Path path = new Path();
             path.setFillType(Path.FillType.EVEN_ODD);
@@ -343,9 +352,9 @@ public class GameView extends SurfaceView implements Runnable {
 
             canvas.drawPath(path, paint);
 
-            a = new Point(screenX, screenY / 3 - 25);
-            b = new Point(screenX, screenY / 3 + 25);
-            c = new Point(screenX - 43, screenY / 3);
+            a = new Point(screenX, screenY / 3 - 20);
+            b = new Point(screenX, screenY / 3 + 20);
+            c = new Point(screenX - 38, screenY / 3);
 
             path = new Path();
             path.setFillType(Path.FillType.EVEN_ODD);
@@ -358,9 +367,9 @@ public class GameView extends SurfaceView implements Runnable {
 
             canvas.drawPath(path, paint);
 
-            paint.setTextSize(screenX / 25);
+            paint.setTextSize(screenX / 35);
             canvas.drawText("WIN THE SHOTS",
-                    23 * screenX / 64, screenY / 3 - screenX / 100 , paint);
+                    23 * screenX / 60, screenY / 3  , paint);
 
             //Outer most white circle
             paint.setColor(Color.WHITE);
@@ -370,52 +379,52 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 13, paint);
 
             //inner colored circle to show as a fine ring
-            paint.setColor(ContextCompat.getColor(getContext(), colorBlueDrop));
+            paint.setColor(getColor(getContext(), colorYellowDrop));
             canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 17, paint);
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
+            paint.setColor(getColor(getContext(), R.color.colorBlueDrop));
             canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 17, paint);
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
+            paint.setColor(getColor(getContext(), R.color.colorGreenDrop));
             canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 8) - 17, paint);
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorGreenDrop));
+            paint.setColor(getColor(getContext(), R.color.colorPinkDrop));
             canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 17, paint);
 
             //inner thicker white dome
             paint.setColor(Color.WHITE);
-            canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 70, paint);
-            canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 70, paint);
-            canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 8) - 70, paint);
-            canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 70, paint);
+            canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 16), paint);
+            canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 16), paint);
+            canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 16), paint);
+            canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 16), paint);
 
             //inner colored to make a hole in the inner ring
             if (!buttonPressed[0]) {
-                paint.setColor(ContextCompat.getColor(getContext(), colorBlueDrop));
-                canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+                paint.setColor(getColor(getContext(), colorYellowDrop));
+                canvas.drawCircle(screenX / 8, screenY - (screenX / 8), (screenX / 24), paint);
             }
             if (!buttonPressed[1]) {
-                paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
-                canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+                paint.setColor(getColor(getContext(), R.color.colorBlueDrop));
+                canvas.drawCircle(screenX / 8 * 3, screenY - (screenX / 8), (screenX / 24), paint);
             }
             if (!buttonPressed[2]) {
-                paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
-                canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+                paint.setColor(getColor(getContext(), R.color.colorGreenDrop));
+                canvas.drawCircle(screenX / 8 * 5, screenY - (screenX / 8), (screenX / 24), paint);
             }
             if (!buttonPressed[3]) {
-                paint.setColor(ContextCompat.getColor(getContext(), R.color.colorGreenDrop));
-                canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 8) - 99, paint);
+                paint.setColor(getColor(getContext(), R.color.colorPinkDrop));
+                canvas.drawCircle(screenX / 8 * 7, screenY - (screenX / 8), (screenX / 24), paint);
             }
 
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorGreenDrop));
-            paint.setTextSize(screenX / 10);
+            paint.setColor(getColor(getContext(), R.color.colorGreenDrop));
+            paint.setTextSize(screenX / 18);
 
-            canvas.drawText("Level:" + (int) level, screenX / 20, screenY / 20, paint);
+            canvas.drawText("Level:" + (int) level, screenX / 40, screenY / 20, paint);
 
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
+            paint.setColor(getColor(getContext(), R.color.colorBlueDrop));
             paint.setTextSize(screenX/10);
             if (paused) {
                 canvas.drawText("▶", 36 * screenX / 80, screenY / 20, paint);
                 paint.setTextSize(screenX / 9);
                 if (!begin)
-                    canvas.drawText("Paused", screenX / 2 - (2 *screenX / 11), screenY / 2, paint);
+                    canvas.drawText("Paused", screenX / 2 - (10 *screenX / 45), screenY / 2, paint);
                 else
                     canvas.drawText("Start", screenX / 2 - (screenX / 8), screenY / 2, paint);
             }
