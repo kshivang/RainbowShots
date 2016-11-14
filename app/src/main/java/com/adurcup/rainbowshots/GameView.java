@@ -132,6 +132,7 @@ public class GameView extends SurfaceView implements Runnable {
 
     Boolean levelUp = false;
     float level = 1;
+    Boolean begin = true;
 
     boolean[] variable = {true, false, true, false, true, false, false, true, false, false};
     public void update() {
@@ -325,12 +326,13 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawLine((3 * screenX / 4) - 1, 0, (3 * screenX / 4) + 1, screenY, paint);
 
             paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
-            canvas.drawLine(0, screenY / 2 - 1, 3 * screenX / 8 , screenY / 2 + 1, paint);
-            canvas.drawLine(5 * screenX / 8, screenY / 2 - 1, screenX , screenY / 2 + 1, paint);
+            canvas.drawLine(0, screenY / 3 - 1, 3 * screenX / 8 , screenY / 3 + 1, paint);
+            canvas.drawLine(5 * screenX / 8, screenY / 3 - 1, screenX , screenY / 3 + 1, paint);
 
             paint.setTextSize(screenX / 30);
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorBlueDrop));
             canvas.drawText("WIN THE SHOTS",
-                    3 * screenX / 8, screenY / 2 + screenX / 60 , paint);
+                    3 * screenX / 8, screenY / 3 + screenX / 60 , paint);
 
             //Outer most white circle
             paint.setColor(Color.WHITE);
@@ -379,16 +381,25 @@ public class GameView extends SurfaceView implements Runnable {
 
             canvas.drawText("Level:" + (int) level, screenX / 20, screenY / 20, paint);
 
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorBlueDrop));
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
             paint.setTextSize(screenX/10);
-            if (paused)
-                canvas.drawText("▶",  36 * screenX / 80, screenY / 20, paint);
-            else
-                canvas.drawText("\u23F8",  141 * screenX / 320, screenY / 20, paint);
+            if (paused) {
+                canvas.drawText("▶", 36 * screenX / 80, screenY / 20, paint);
+                paint.setTextSize(screenX / 9);
+                if (!begin)
+                    canvas.drawText("Paused", screenX / 2 - (screenX / 6), screenY / 2, paint);
+                else
+                    canvas.drawText("Start", screenX / 2 - (screenX / 7), screenY / 2, paint);
+            }
+            else {
+                canvas.drawText("\u23F8", 141 * screenX / 320, screenY / 20, paint);
+            }
+
 
             if (levelUp) {
+                begin = true;
                 paint.setTextSize(screenX / 8);
-                canvas.drawText("Level Cleared!", screenX / 20, screenY / 2, paint);
+                canvas.drawText("Level Cleared!", screenX / 20, screenY / 3, paint);
             }
             // Draw everything to the screen
             ourHolder.unlockCanvasAndPost(canvas);
@@ -420,6 +431,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Player has touched the screen
             case MotionEvent.ACTION_DOWN:
+                begin = false;
                 levelUp = false;
                 float x, y;
 
