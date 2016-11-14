@@ -39,10 +39,10 @@ public class GameView extends SurfaceView implements Runnable {
 
     private Button[] buttons = new Button[4];
 
-    private Drop[][] drops = new Drop[4][11];
+    private Drop[][] drops = new Drop[4][4];
     // Maximum drops would be 3, one more than value assigned
     // as 0 included
-    private int maxDrops = 10;
+    private int maxDrops = 3;
 
 
     Rect frameToDraw;
@@ -78,8 +78,17 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void prepareLevel() {
-        for (int i = 0; i < buttons.length; i++) {
+
+        if (cutOffLevel == null || cutOffLevel < 2 * screenY/3) {
+            cutOffLevel = screenY / 6 + (level * screenY / 18);
+        }
+
+        for (int i = 0; i < 4; i++) {
             buttons[i] = new Button(screenX, screenY, i);
+            nextDrop[i] = 0;
+            activeDropsCount[i] =  0;
+            previousDrop[i] = 0;
+            bottomDrop[i] = 0;
         }
 
         randomCloudGap[0] = screenX / 8;
@@ -128,15 +137,14 @@ public class GameView extends SurfaceView implements Runnable {
         }
     }
 
-    int[] nextDrop = {0, 0, 0, 0};
-    int[] activeDropsCount = {0, 0, 0, 0};
-    int[] previousDrop = {0, 0, 0, 0}, bottomDrop = {0, 0, 0, 0};
+    int[] nextDrop = new int[4], activeDropsCount = new int[4],
+            previousDrop = new int[4], bottomDrop = new int[4];
     int randomGap = 2, randColor = 0;
     int randomCloudGap[] = new int[10];
 
-    Boolean levelUp = false;
-    float level = 1;
-    Boolean begin = true;
+    private Boolean levelUp = true;
+    private int level = 1;
+    private Integer cutOffLevel;
 
     boolean[] variable = {true, false, true, false, true, false, false, true, false, false};
     public void update() {
@@ -192,7 +200,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             if (activeDropsCount[i] == 0 ||
                     (drops[i][previousDrop[i]].getImpactPointY() > randomGap)) {
-                if (drops[i][nextDrop[i]].shoot(drops[0][0].DOWN, randColor, level, getContext())) {
+                if (drops[i][nextDrop[i]].shoot(drops[0][0].DOWN, randColor, level)) {
                     activeDropsCount[i]++;
                     randColor = generator.nextInt(4);
                     // randomGap between consecutive drops
@@ -213,7 +221,7 @@ public class GameView extends SurfaceView implements Runnable {
                 if (drop.getStatus() &&
                         (drop.getImpactPointY() > screenY - buttons[i].getButtonHeight())) {
                     if (drop.getColorState() == i) {
-                        buttons[i].isTopThresholdReached(screenY);
+                        buttons[i].isTopThresholdReached(screenY, cutOffLevel);
                     } else {
                         buttons[i].isBottomThresholdReached(screenY, screenX);
                     }
@@ -228,17 +236,14 @@ public class GameView extends SurfaceView implements Runnable {
             }
         }
 
-        if (buttons[0].getButtonHeight() >= 2 * screenY / 3
-                && buttons[1].getButtonHeight() >= 2 * screenY / 3
-                && buttons[2].getButtonHeight() >= 2 * screenY / 3
-                && buttons[3].getButtonHeight() >= 2 * screenY / 3) {
+        if (buttons[0].getButtonHeight() >= cutOffLevel
+                && buttons[1].getButtonHeight() >= cutOffLevel
+                && buttons[2].getButtonHeight() >= cutOffLevel
+                && buttons[3].getButtonHeight() >= cutOffLevel) {
             paused = true;
             levelUp = true;
             level++;
-            buttons[0].reset(screenX, screenY, 0);
-            buttons[1].reset(screenX, screenY, 1);
-            buttons[2].reset(screenX, screenY, 2);
-            buttons[3].reset(screenX, screenY, 3);
+            prepareLevel();
         }
     }
 
@@ -339,11 +344,14 @@ public class GameView extends SurfaceView implements Runnable {
 
             paint.setColor(getColor(getContext(), R.color.colorPinkDrop));
             paint.setStrokeWidth(1.4f);
-            canvas.drawLine(0, screenY / 3 + 1, screenX , screenY / 3 + 1, paint);
 
-            Point a = new Point(0, screenY / 3 - 20);
-            Point b = new Point(0, screenY / 3 + 20);
-            Point c = new Point(38, screenY / 3);
+            int winY = (screenY - cutOffLevel - (screenX / 20));
+
+            canvas.drawLine(0, winY, screenX, winY, paint);
+
+            Point a = new Point(0, winY - 20);
+            Point b = new Point(0, winY + 20);
+            Point c = new Point(38, winY);
 
             Path path = new Path();
             path.setFillType(Path.FillType.EVEN_ODD);
@@ -354,9 +362,9 @@ public class GameView extends SurfaceView implements Runnable {
 
             canvas.drawPath(path, paint);
 
-            a = new Point(screenX, screenY / 3 - 20);
-            b = new Point(screenX, screenY / 3 + 20);
-            c = new Point(screenX - 38, screenY / 3);
+            a = new Point(screenX, winY - 20);
+            b = new Point(screenX, winY+ 20);
+            c = new Point(screenX - 38, winY);
 
             path = new Path();
             path.setFillType(Path.FillType.EVEN_ODD);
@@ -371,7 +379,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             paint.setTextSize(screenX / 35);
             canvas.drawText("WIN THE SHOTS",
-                    23 * screenX / 60, screenY / 3  , paint);
+                    23 * screenX / 60, winY , paint);
 
             //Outer most white circle
             paint.setColor(Color.WHITE);
@@ -418,14 +426,14 @@ public class GameView extends SurfaceView implements Runnable {
             paint.setColor(getColor(getContext(), R.color.colorGreenDrop));
             paint.setTextSize(screenX / 18);
 
-            canvas.drawText("Level:" + (int) level, screenX / 40, screenY / 20, paint);
+            canvas.drawText("Level:" + level, screenX / 40, screenY / 20, paint);
 
             paint.setColor(getColor(getContext(), R.color.colorYellowDrop));
             paint.setTextSize(screenX/10);
             if (paused) {
                 canvas.drawText("▶", 36 * screenX / 80, screenY / 20, paint);
                 paint.setTextSize(screenX / 9);
-                if (!begin)
+                if (!levelUp)
                     canvas.drawText("Paused", screenX / 2 - (10 *screenX / 45), screenY / 2, paint);
                 else
                     canvas.drawText("Start", screenX / 2 - (screenX / 8), screenY / 2, paint);
@@ -435,10 +443,9 @@ public class GameView extends SurfaceView implements Runnable {
             }
 
 
-            if (levelUp) {
-                begin = true;
-                paint.setTextSize(screenX / 8);
-                canvas.drawText("Level Cleared!", screenX / 20, screenY / 3, paint);
+            if (levelUp && level != 1) {
+                paint.setTextSize(screenX / 15);
+                canvas.drawText("Level Cleared!", screenX / 4, screenY / 3, paint);
             }
             // Draw everything to the screen
             ourHolder.unlockCanvasAndPost(canvas);
@@ -470,7 +477,6 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Player has touched the screen
             case MotionEvent.ACTION_DOWN:
-                begin = false;
                 levelUp = false;
                 float x, y;
 

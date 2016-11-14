@@ -1,6 +1,5 @@
 package com.adurcup.rainbowshots;
 
-import android.content.Context;
 import android.graphics.Rect;
 
 /**
@@ -23,7 +22,7 @@ class Drop {
 
     // Going nowhere
     private int heading = -1;
-    private float speed = 250;
+    private float speed = 200;
 
     private int width;
     private int height;
@@ -98,9 +97,9 @@ class Drop {
 
     }
 
-    boolean shoot(int direction, int randColor, float level, final Context context) {
+    boolean shoot(int direction, int randColor, float level) {
         if (!isActive) {
-            speed = 100 + 100*level;
+            speed = 200 + 25 * level;
             y = 0;
             colorState = randColor;
             color = colorChooser[randColor];

@@ -24,9 +24,9 @@ public class Button {
         return buttonHeight;
     }
 
-    Boolean isTopThresholdReached(int screenY){
+    Boolean isTopThresholdReached(int screenY, int cutOffLevel){
 
-        if(buttonHeight < 2 * screenY / 3) {
+        if(buttonHeight < cutOffLevel) {
             buttonHeight = buttonHeight + screenY / 20;
             rect.bottom = screenY - buttonHeight;
             return false;
