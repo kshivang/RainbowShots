@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -321,18 +322,45 @@ public class GameView extends SurfaceView implements Runnable {
             paint.setColor(Color.GRAY);
 //            paint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
 
-            canvas.drawLine((screenX / 4) - 1, 0, (screenX / 4) + 1, screenY, paint);
-            canvas.drawLine((2 * screenX / 4) - 1, 0, (2 * screenX / 4) + 1, screenY, paint);
-            canvas.drawLine((3 * screenX / 4) - 1, 0, (3 * screenX / 4) + 1, screenY, paint);
+            canvas.drawLine((screenX / 4) + 1, 0, (screenX / 4) + 1, screenY, paint);
+            canvas.drawLine((2 * screenX / 4) + 1, 0, (2 * screenX / 4) + 1, screenY, paint);
+            canvas.drawLine((3 * screenX / 4) + 1, 0, (3 * screenX / 4) + 1, screenY, paint);
 
             paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
-            canvas.drawLine(0, screenY / 3 - 1, 3 * screenX / 8 , screenY / 3 + 1, paint);
-            canvas.drawLine(5 * screenX / 8, screenY / 3 - 1, screenX , screenY / 3 + 1, paint);
+            paint.setStrokeWidth(1.4f);
+            canvas.drawLine(0, screenY / 3 + 1, screenX , screenY / 3 + 1, paint);
 
-            paint.setTextSize(screenX / 30);
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorBlueDrop));
+            Point a = new Point(0, screenY / 3 - 25);
+            Point b = new Point(0, screenY / 3 + 25);
+            Point c = new Point(43, screenY / 3);
+
+            Path path = new Path();
+            path.setFillType(Path.FillType.EVEN_ODD);
+            path.lineTo(b.x, b.y);
+            path.lineTo(c.x, c.y);
+            path.lineTo(a.x, a.y);
+            path.close();
+
+            canvas.drawPath(path, paint);
+
+            a = new Point(screenX, screenY / 3 - 25);
+            b = new Point(screenX, screenY / 3 + 25);
+            c = new Point(screenX - 43, screenY / 3);
+
+            path = new Path();
+            path.setFillType(Path.FillType.EVEN_ODD);
+
+            path.moveTo(a.x, a.y);
+            path.lineTo(b.x, b.y);
+            path.lineTo(c.x, c.y);
+            path.lineTo(a.x, a.y);
+            path.close();
+
+            canvas.drawPath(path, paint);
+
+            paint.setTextSize(screenX / 25);
             canvas.drawText("WIN THE SHOTS",
-                    3 * screenX / 8, screenY / 3 + screenX / 60 , paint);
+                    23 * screenX / 64, screenY / 3 - screenX / 100 , paint);
 
             //Outer most white circle
             paint.setColor(Color.WHITE);
@@ -381,15 +409,15 @@ public class GameView extends SurfaceView implements Runnable {
 
             canvas.drawText("Level:" + (int) level, screenX / 20, screenY / 20, paint);
 
-            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorPinkDrop));
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.colorYellowDrop));
             paint.setTextSize(screenX/10);
             if (paused) {
                 canvas.drawText("▶", 36 * screenX / 80, screenY / 20, paint);
                 paint.setTextSize(screenX / 9);
                 if (!begin)
-                    canvas.drawText("Paused", screenX / 2 - (screenX / 6), screenY / 2, paint);
+                    canvas.drawText("Paused", screenX / 2 - (2 *screenX / 11), screenY / 2, paint);
                 else
-                    canvas.drawText("Start", screenX / 2 - (screenX / 7), screenY / 2, paint);
+                    canvas.drawText("Start", screenX / 2 - (screenX / 8), screenY / 2, paint);
             }
             else {
                 canvas.drawText("\u23F8", 141 * screenX / 320, screenY / 20, paint);
