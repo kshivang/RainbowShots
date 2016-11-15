@@ -1,6 +1,7 @@
 package com.adurcup.rainbowshots;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -13,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.Locale;
 import java.util.Random;
 
 import static android.support.v4.content.ContextCompat.getColor;
@@ -31,6 +33,8 @@ public class GameView extends SurfaceView implements Runnable {
     private Paint paint;
 
     private long fps;
+    private long score = 0;
+    private long bestScore = 0;
 
     private int screenX;
 
@@ -57,9 +61,13 @@ public class GameView extends SurfaceView implements Runnable {
     private boolean[] variable = {true, false, true, false, true, false, false, true, false, false};
 
     private long maxTime = 0;
+    private SharedPreferences sp;
+    private final String KEY_BEST = "kb";
 
     public GameView (Context context) {
         super(context);
+
+        sp = context.getSharedPreferences(BuildConfig.APPLICATION_ID, 0);
 
         Display display = ((GameActivity)context).getWindowManager()
                 .getDefaultDisplay();
@@ -79,6 +87,11 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void prepareLevel() {
+
+        if (level == 1) {
+            bestScore = sp.getLong(KEY_BEST, 0);
+            score = 0;
+        }
 
         maxTime = (120 * 1000) + maxTime - totalTimeThisLevel;
         totalTimeThisLevel = 0;
@@ -145,6 +158,11 @@ public class GameView extends SurfaceView implements Runnable {
                 if (totalTimeThisLevel >= maxTime) {
                     gameOver = true;
                     paused = true;
+                    if (bestScore < score) {
+                        SharedPreferences.Editor spEditor = sp.edit();
+                        spEditor.putLong(KEY_BEST, score);
+                        spEditor.apply();
+                    }
                 }
             }
         }
@@ -224,8 +242,10 @@ public class GameView extends SurfaceView implements Runnable {
                 if (drop.getStatus() &&
                         (drop.getImpactPointY() > screenY - buttons[i].getButtonHeight())) {
                     if (drop.getColorState() == i) {
+                        dropBurst(false);
                         buttons[i].isTopThresholdReached(screenY, cutOffLevel);
                     } else {
+                        dropBurst(true);
                         buttons[i].isBottomThresholdReached(screenY, screenX);
                     }
                     drop.setInactive();
@@ -246,6 +266,7 @@ public class GameView extends SurfaceView implements Runnable {
             paused = true;
             levelUp = true;
             level++;
+            score += level * score;
             prepareLevel();
         }
     }
@@ -432,12 +453,27 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawText("Level:" + level, screenX / 40, screenY / 20, paint);
 
             paint.setColor(getColor(getContext(), R.color.colorBlueDrop));
-            if (totalTimeThisLevel < maxTime) {
+            if ((int)(totalTimeThisLevel / 1000) < (int)(maxTime / 1000)) {
                 canvas.drawText(secToTime((maxTime - totalTimeThisLevel) / 1000),
-                        3 * screenX / 4, screenY / 20, paint);
+                        screenX / 2 - screenX / 12, screenY / 13, paint);
             } else {
-                canvas.drawText("Time Up", 3 * screenX / 4, screenY / 20, paint);
-                canvas.drawText("Game Over!", screenX / 4, screenY / 3, paint);
+                canvas.drawText("Time Up", 3 * screenX / 8, screenY / 13, paint);
+                canvas.drawText("Game Over!", screenX / 3, screenY / 3, paint);
+            }
+
+            paint.setColor(getColor(getContext(), R.color.colorPinkDrop));
+            paint.setTextSize(screenX / 20);
+
+            canvas.drawText(String.format(Locale.ENGLISH, "Score:%d", (int) score),
+                    screenX - ((5 + noOfDigit(score)) * screenX / 25), screenY / 20, paint);
+
+            paint.setTextSize(screenX / 30);
+            if (score > bestScore) {
+                canvas.drawText(String.format(Locale.ENGLISH, "Best:%d", (int) score),
+                        screenX - ((5 + noOfDigit(score)) * screenX / 40), screenY / 15, paint);
+            } else {
+                canvas.drawText(String.format(Locale.ENGLISH, "Best:%d", (int) bestScore),
+                        screenX - ((5 + noOfDigit(bestScore)) * screenX / 40), screenY / 15, paint);
             }
 
             paint.setColor(getColor(getContext(), R.color.colorYellowDrop));
@@ -447,8 +483,9 @@ public class GameView extends SurfaceView implements Runnable {
                 paint.setTextSize(screenX / 9);
                 if (levelUp || gameOver)
                     canvas.drawText("Start", screenX / 2 - (screenX / 8), screenY / 2, paint);
-                else
-                    canvas.drawText("Paused", screenX / 2 - (10 *screenX / 45), screenY / 2, paint);
+                else {
+                    canvas.drawText("Paused", screenX / 2 - (10 * screenX / 45), screenY / 2, paint);
+                }
             }
             else {
                 canvas.drawText("\u23F8", 141 * screenX / 320, screenY / 20, paint);
@@ -480,11 +517,24 @@ public class GameView extends SurfaceView implements Runnable {
 
     public void resume() {
         playing = true;
+        paused = true;
         gameThread = new Thread(this);
         gameThread.start();
     }
 
     boolean buttonPressed[] = {false, false, false, false, false};
+
+    private void dropBurst(boolean wrongDropBurst) {
+        if (wrongDropBurst) {
+            if (score - (level * 3) < 0) {
+                score = 0;
+            } else {
+                score -= (level * 3);
+            }
+        } else {
+            score += level * 2;
+        }
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
@@ -507,6 +557,8 @@ public class GameView extends SurfaceView implements Runnable {
                         if (y > screenY - buttons[0].getButtonHeight()) {
 
                             if (!paused) {
+                                buttonPressed[0] = true;
+                                dropBurst(drops[0][bottomDrop[0]].getColorState() == 0);
                                 drops[0][bottomDrop[0]].setInactive();
                                 activeDropsCount[0]--;
                                 if (bottomDrop[0] == maxDrops) {
@@ -514,12 +566,13 @@ public class GameView extends SurfaceView implements Runnable {
                                 } else {
                                     bottomDrop[0]++;
                                 }
-                                buttonPressed[0] = true;
                             }
                         }
                     } else if (activeDropsCount[1] > 0 && x < screenX / 2) {
                         if (y > screenY - buttons[1].getButtonHeight()) {
                             if (!paused) {
+                                buttonPressed[1] = true;
+                                dropBurst(drops[1][bottomDrop[1]].getColorState() == 1);
                                 drops[1][bottomDrop[1]].setInactive();
                                 activeDropsCount[1]--;
                                 if (bottomDrop[1] == maxDrops) {
@@ -527,13 +580,13 @@ public class GameView extends SurfaceView implements Runnable {
                                 } else {
                                     bottomDrop[1]++;
                                 }
-
-                                buttonPressed[1] = true;
                             }
                         }
                     } else if (activeDropsCount[2] > 0 && x < (3 * screenX / 4)) {
                         if (y > screenY - buttons[2].getButtonHeight()) {
                             if (!paused) {
+                                buttonPressed[2] = true;
+                                dropBurst(drops[2][bottomDrop[2]].getColorState() == 2);
                                 drops[2][bottomDrop[2]].setInactive();
                                 activeDropsCount[2]--;
                                 if (bottomDrop[2] == maxDrops) {
@@ -541,12 +594,13 @@ public class GameView extends SurfaceView implements Runnable {
                                 } else {
                                     bottomDrop[2]++;
                                 }
-                                buttonPressed[2] = true;
                             }
                         }
                     } else {
                         if (activeDropsCount[3] > 0 && y > screenY - buttons[3].getButtonHeight()) {
                             if (!paused) {
+                                buttonPressed[3] = true;
+                                dropBurst(drops[3][bottomDrop[3]].getColorState() == 3);
                                 drops[3][bottomDrop[3]].setInactive();
                                 activeDropsCount[3]--;
                                 if (bottomDrop[3] == maxDrops) {
@@ -554,26 +608,48 @@ public class GameView extends SurfaceView implements Runnable {
                                 } else {
                                     bottomDrop[3]++;
                                 }
-                                buttonPressed[3] = true;
                             }
                         }
                     }
                 } else {
+                    paused = false;
+                    gameOver = false;
+                    maxTime = 0;
                     level = 1;
                     prepareLevel();
                 }
                 break;
             // Player has removed finger from screen
             case MotionEvent.ACTION_UP:
-                buttonPressed[0] = false;
-                buttonPressed[1] = false;
-                buttonPressed[2] = false;
-                buttonPressed[3] = false;
+                if (!gameOver) {
+                    buttonPressed[0] = false;
+                    buttonPressed[1] = false;
+                    buttonPressed[2] = false;
+                    buttonPressed[3] = false;
+                } else {
+                    paused = false;
+                    gameOver = false;
+                    maxTime = 0;
+                    level = 1;
+                    prepareLevel();
+                }
                 // paused = true;
                 break;
 
         }
         return true;
+    }
+
+    private int noOfDigit(long number) {
+        if (number == 0) {
+            return 1;
+        }
+        int i = 0;
+        while (number != 0) {
+            number /= 10;
+            i++;
+        }
+        return i;
     }
 
     private String secToTime(long sec) {
