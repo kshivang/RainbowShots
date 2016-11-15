@@ -2,12 +2,14 @@ package com.adurcup.rainbowshots;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 /**
  * Created by kshivang on 15/11/16.
+ *
  */
 
 public class SplashActivity extends AppCompatActivity{
@@ -29,7 +31,13 @@ public class SplashActivity extends AppCompatActivity{
             @Override
             public void onAnimationEnd(Animation animation) {
                 isAnimationFinished = true;
-                startActivity(new Intent(SplashActivity.this, GameActivity.class));
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        startActivity(new Intent(SplashActivity.this, GameActivity.class));
+                    }
+                }, 2000);
             }
 
             @Override
